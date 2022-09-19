@@ -1,0 +1,134 @@
+# Meaningful Names
+
+We want our code to be as easy to read as possible. A paperback, not an academic paper.
+
+### Use Intention Revealing Names
+
+-   Specify what is measured and the units
+
+        ```
+        let elapsedTimeInDays;
+        let elapsedTimeInHours;
+        ```
+
+        - Bad
+        	```
+        	public getList(): number[][] {
+        		const list1: number[][] = [];
+        		for (const l of this.mainList) { //what is mainList?
+        			if (l[0] === 4) { //why is the zeroth index important? What is 4?
+        				list1.push(l);
+        			}
+        		}
+        		return list1;
+        	}
+        	```
+        - Better (example: Game Board)
+        	```
+        	public getFlaggedRows(): number[][] {
+        		const flaggedRows: number[][] = [];
+        		for (const row of this.gameBoard) {
+        			if (row[STATUS_CELL] === FLAGGED) {
+        				flaggedRows.push(row);
+        			}
+        		}
+        		return flaggedRows;
+        	}
+        	```
+
+### Avoid Disinformation
+
+    -   Bad
+        ```
+        let accountList: Record<string, string> = {}; //THIS IS NOT ACTUALLY A LIST
+        let name: f64; //why would name be a float?
+        ```
+    -   Better
+        ```
+        let accounts: Record<string, string> = {};
+        let name: string;
+        ```
+
+### Make Meaningful Distinctions
+
+    - Avoid "noise words" like info or data
+    - Avoid sequencing variables with numbers
+
+    	-   Bad
+    		```
+    		let group1;
+    		let group2;
+    		let group3;
+    		```
+    	-   Better
+    		```
+    		let teachers;
+    		let students;
+    		let parents;
+    		```
+    		***
+    	-   Bad
+    		```
+    		public copyChars(s1: string, s2: string): string {
+    			for (let i = 0; i < s1.length; i++) {
+    				s2[i] = s1[i];
+    			}
+    		}
+    		```
+    	-   Better
+    		```
+    		public copyChars(source: string, destination: string): string {
+    			for (let i = 0; i < source.length; i++) {
+    				destination[i] = source[i];
+    			}
+    		}
+    		```
+    		---
+    	- Bad
+    		```
+    		let nameString: string;
+    		let accountsInfo: Record<string, string>;
+    		```
+    	- Better
+    		```
+    		let name: string;
+    		let accounts: Record<string, string>;
+    		```
+
+### Use Searchable Names
+
+-   Make it easy for someone to find in a body of code
+-   Short names should only appear in small functions and be confined to the function's scope
+
+### Class Names
+
+-   Nouns or noun phrases (`Customer`, `Post`)
+-   Avoid vague words like `Manager`,`Processor`,`Data`, or `Info`
+
+### Method Names
+
+-   Verbs or verb phrases (`save`, `deletePage`)
+
+### Pick One Word per Abstract Concept
+
+-   Bad
+
+    ```
+    user.get();
+    admin.fetch();
+    player.retrieve();
+
+    class UserManager {}; //also just a bad class name, too vague
+    class PlayerController {};
+    ```
+
+-   Better
+
+    ```
+    user.get(); //pick one word for the abstract concept of "getting" a record
+    admin.get();
+    player.get();
+
+    class UserController {};
+    class PlayerController {};
+    ```

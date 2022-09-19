@@ -1,0 +1,126 @@
+# OOP Review
+
+## Inheritance
+
+-   Subclasses inherit the properties and methods of parent class
+
+```
+export class Animal {
+	private sound: string = '';
+
+	public setSound(newSound: string): void {
+		this.sound = newSound;
+	}
+
+	public getSound(): string {
+		return this.sound;
+	}
+}
+
+class Dog extends Animal {
+	constructor() {
+		super();
+		this.setSound('bark');
+	}
+
+	public digHole(): void {
+		console.log('Dug hole');
+	}
+}
+
+class Cat extends Animal {
+	constructor() {
+		super();
+		this.setSound('meow');
+	}
+}
+
+const dog = new Dog();
+dog.digHole(); //dug hole
+console.log(dog.getSound()); //bark
+
+const cat = new Cat();
+console.log(cat.getSound()); //meow
+```
+
+### When to use Inheritance
+
+-   "Is a" rule
+-   When the subclass needs most of the
+-   DON'T use inheritance just to reuse code, or if the "is a" relationship doesn't exist
+
+## Polymorphism
+
+-   Allows subclasses to change/add methods without affecting parent class
+
+    ```
+    const dog: Dog = new Dog();
+    dog.digHole(); //this works because the Dog class has its own digHole() method
+
+    const dog: Animal = new Dog();
+    dog.digHole(); //Does NOT work. Animal class does not know about the digHole method
+    ```
+
+## Abstract Classes
+
+-   Forces a "contract" on subclasses without actually implementing the details
+-   You can't instantiate abstract classes by themselves
+
+    ```
+    export abstract class Creature {
+    	protected sound!: string;
+
+    	public setSound(newSound: string): void {
+    		this.sound = newSound;
+    	}
+
+    	public abstract makeSound(): void;
+    }
+
+    class Liger extends Creature {
+    	constructor() {
+    		super();
+    		this.setSound('Meowroar');
+    	}
+
+    	public makeSound(): void {
+    		console.log(this.sound);
+    	}
+    }
+
+    const liger = new Liger();
+    liger.makeSound();
+    ```
+
+## Interfaces
+
+-   Class or object where everything is abstract
+
+    ```
+    interface Props {
+    	name: string;
+    	link: string;
+    }
+
+    const props: Props {
+    	name: 'Liger',
+    	link: 'liger'
+    }
+
+    ---
+
+    export interface NamedCreature {
+    	name: string;
+    	printName: () => void;
+    }
+
+    class Puppy implements NamedCreature {
+    	name: string = 'Puppy';
+    	printName() {
+    		console.log(this.name);
+    	}
+    }
+
+    const pup = new Puppy();
+    pup.printName();
+    ```
