@@ -34,7 +34,9 @@ export default function AppLayout({ children }: Props) {
 					...headerFooterStyles,
 				}}
 			>
-				<div>Made with ❤️ by Brian Fitzsimmons</div>
+				<div>
+					Made with ❤️ by <a href='https://github.com/bfitzsimmons703'>Brian Fitzsimmons</a>
+				</div>
 			</footer>
 		</div>
 	);
