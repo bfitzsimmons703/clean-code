@@ -1,0 +1,226 @@
+# Functions
+
+### Functions should be small
+
+-   20-30 lines max
+-   1-2 levels of indentation, and blocks within conditionals should be functions themselves
+
+    -   Bad
+        ```
+        function doIt(x: any): void {
+            if (x.isTesting) {
+                if (x.isDev) {
+                    //...
+                } else if (x.isStaging) {
+                    //...
+                }
+            } else {
+                x.run();
+            }
+        }
+        ```
+    -   Better
+
+        ```
+        function doIt(x: any): void {
+            if (x.isTesting) {
+                setupTest(x);
+            }
+
+            x.run();
+        }
+        ```
+
+### Functions should do ONE thing, and do it well
+
+    -   The content should perform work that is ONE level of abstraction below the function name
+    -   A good test: see if you can extract contents of the function into another function that has a meaningfully different name
+    -   If it has lots of switch statements, hide that switch statement behind a Factory class implementation
+        - Bad
+            ```
+            enum GameType {
+                Multiplayer,
+                SinglePlayer,
+            }
+
+            class Game {
+                type!: GameType;
+            }
+
+            function calculateScore(game: Game): number {
+                switch (game.type) {
+                    case GameType.Multiplayer:
+                        return calculateMultiPlayerScore(game);
+                    case GameType.SinglePlayer:
+                        return calculateSinglePlayerScore(game);
+                    default:
+                        throw new Error('Unknown Game Type');
+                }
+            }
+            ```
+
+        - Better
+            ```
+            interface Game {
+                calculateScore(): number;
+            }
+
+            class MultiplayerGame implements Game {
+                calculateScore(): number {
+                    return 1;
+                }
+            }
+
+            class SinglePlayerGame implements Game {
+                calculateScore(): number {
+                    return 2;
+                }
+            }
+
+            class GameFactory {
+                public static makeGame(type: GameType): Game {
+                    switch (type) {
+                        case GameType.SinglePlayer:
+                            return new SinglePlayerGame();
+                        case GameType.Multiplayer:
+                            return new MultiplayerGame();
+                    }
+                }
+            }
+
+            const game = GameFactory.makeGame(GameType.Multiplayer);
+            console.log(game.calculateScore());
+            ```
+
+### Stepdown Rule: Code should read like a set of top-down "TO" statements
+
+    > To get the top user score, we get all user scores
+    >
+    > > To get all user scores, we query the database
+
+### Use Descriptive Names
+
+    - The name should reflect what the function does. Devs should not be surprised.
+    - Long descriptive names are better than short confusing names
+
+### Max 3 arguments to a single function
+
+    - The more arguments you have, the harder it is to test all combinations of those arguments
+    - If you have more, use an object
+    - Bad
+        ```
+        function draw(x: number, y: number, height: number, width: number, color: string) {}
+        ```
+    - Better
+        ```
+        function draw({
+            x: number,
+            y: number,
+            height: number,
+            width: number,
+            color: string
+        }) {}
+        ```
+
+### Avoid side effects
+
+    - Your function name says it does one thing, but it does a hidden other thing
+
+    - Bad
+        ```
+        function checkPassword(username: string, providedPassword: string): boolean {
+            const user = User.getUserByName(username);
+            if (user) {
+                const encryptedPassword = user.getEncryptedPassword();
+                if (encryptedPassword === encrypt(providedPassword)) {
+                    Session.start(); //SIDE EFFECT!!
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        ```
+    - Better
+        ```
+        function checkPassword(username: string, providedPassword: string): boolean {
+            const user = User.getUserByName(username);
+            if (user) {
+                const encryptedPassword = user.getEncryptedPassword();
+                if (encryptedPassword === encrypt(providedPassword)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        function startSession(): void {
+            console.log('Starting session');
+            Session.start();
+        }
+
+        function main() {
+            if (checkPassword(....)) {
+                startSession();
+            }
+        }
+        ```
+
+### Avoid Flag/Boolean arguments.
+
+    - Just make two functions
+
+### Separate Commands from Queries
+
+    - Bad
+        ```
+        function set(attribute: string, value: string): boolean {
+            this.attribute = value;
+            return true;
+        }
+
+        if (set('name', 'Jesse')) {
+            // Does this mean the set was successfull, or that the object has the name 'Jesse' set?
+        }
+        ```
+    - Better
+        ```
+        if (obj.hasOwnProperty('name')) {
+            this.setName('Jesse');
+        }
+        ```
+
+### Separate Try/Catch block logic into their own functions
+
+    - A function with a try/catch block should have nothing before the try, nothing after the catch
+    - Bad
+        ```
+        try {
+            const scores = getUserScores();
+            return scores.filter(score => score > 100):
+        } catch (e) {
+            logger.logError(e.toString());
+        }
+        ```
+    - Better
+        ```
+        function getUserScoresGreaterThanX(threshold: number) {
+            const scores = getUserScores();
+            return scores.filter(score => score > x):
+        }
+
+        function logError(e: Error) {
+            logger.logError(e);
+        }
+
+        try {
+            getUserScoresGreaterThanX(100);
+        } catch (e) {
+            logError(e);
+        }
+        ```
+
+### DRY
+
+    - Don't Repeat Yourself
