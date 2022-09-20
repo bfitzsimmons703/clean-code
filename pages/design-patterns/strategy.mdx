@@ -1,1 +1,221 @@
 # Strategy Design Pattern
+
+You define a family of algorithms (like scoring a Playlive game) in _separate_ classes and make them interchangeable.
+
+Classes can choose whatever implementation of the algorithm they want, and update them at runtime. Leverages composition, since the implementation is a class property.
+
+This lets you add functionality to superclasses without breaking subclasses.
+
+## Example 1: If you have a superclass `Animal` and two subclasses, `Dog` and `Bird`, how do you add a `fly()` method?
+
+-   Bad - add `fly()` method directly to `Animal` superclass
+
+    ```
+    export abstract class Animal {
+        ...
+
+        public fly(): void {
+            console.log('Animal is flying');
+        }
+    }
+
+    class Dog extends Animal {
+        constructor() {
+            super();
+        }
+    }
+
+    class Bird extends Animal {
+        constructor() {
+            super();
+        }
+    }
+    ```
+
+    -   Now all subclasses are forced to use this implementation unless you override it in each subclass
+    -   Also want to avoid adding `fly()` to all subclasses, since that introduces duplication
+
+-   Also Bad - making an interface to FORCE subclasses to adopt fly method
+
+    ```
+    interface Flys {
+        fly(): void;
+    }
+
+    class Animal implements Flys {...}
+
+    class Dog extends Animal {
+        constructor() {
+            super();
+        }
+
+        //NEED TO IMPLEMENT FLY NOW
+    }
+
+    class Bird extends Animal {
+        constructor() {
+            super();
+        }
+
+        //NEED TO IMPLEMENT FLY NOW
+    }
+    ```
+
+    -   Now Dog and Cat break unless you implement the fly method, and a superclass change should NOT break subclasses
+    -   This will also lead to duplication, since you have to implement fly everywhere anyway
+
+-   Better, with the Strategy Pattern
+
+    ```
+    // Make an interface to implement all the different behavior of flying, and make that an instance variable on the flying class
+    // Subclasses can set whatever "flying" type they want
+    // Let's you change the behavior at runtime without side effects
+    // Can start the Animal as ItFlys, then switch to CantFly without breaking other subclasses
+
+    interface Flys {
+        fly(): void;
+    }
+
+    //Make classes that define any type of "flying" behavior you want
+    class ItFlys implements Flys {
+        public fly(): void {
+            console.log('FLYING');
+        }
+    }
+
+    class CantFly implements Flys {
+        public fly(): void {
+            console.log('NOT FLYING');
+        }
+    }
+
+    class SuperFly implements Flys {
+        public fly(): void {
+            console.log('I AM FLYING FAST');
+        }
+    }
+
+    export abstract class Animal {
+        private flyingType!: Flys;
+
+        public setFlyingType(newFlyingType: Flys): void {
+            this.flyingType = newFlyingType;
+        }
+
+        public tryToFly(): void {
+            this.flyingType.fly();
+        }
+    }
+
+    class Dog extends Animal {
+        constructor() {
+            super();
+            this.setFlyingType(new CantFly());
+        }
+    }
+
+    class Bird extends Animal {
+        constructor() {
+            super();
+            this.setFlyingType(new ItFlys());
+        }
+    }
+
+    const dog: Animal = new Dog();
+    dog.tryToFly();
+
+    const bird: Animal = new Bird();
+    bird.tryToFly();
+
+    // Can change behavior at runtime!
+    dog.setFlyingType(new SuperFly());
+    dog.tryToFly();
+    ```
+
+## Example 2: Implementing a payment strategy
+
+-   Bad - long list of conditionals depending on the type of payment processor
+
+    ```
+    class PaymentProcessor {
+        public processPayment(paymentType: string) {
+            switch (paymentType) {
+                case 'PayPal':
+                //...
+                case 'Stripe':
+                //...
+                case 'ApplePay':
+                //...
+                case 'GooglePay':
+                //...
+            }
+        }
+    }
+    ```
+
+    -   Violates the single-responsibility principle, because now this class is handling lots of different payment logic
+
+-   Better
+
+    ```
+    interface PaymentProvider {
+        pay(): void;
+    }
+
+    class PayPal implements PaymentProvider {
+        pay(): void {
+            console.log('PAYING WITH PAYPAL');
+        }
+    }
+
+    class Stripe implements PaymentProvider {
+        pay(): void {
+            console.log('PAYING WITH STRIPE');
+        }
+    }
+
+    class PaymentProcessor {
+        paymentProvider!: PaymentProvider;
+
+        constructor(paymentProvider: PaymentProvider) {
+            this.paymentProvider = paymentProvider;
+        }
+
+        public setPaymentProvider(newProvider: PaymentProvider) {
+            this.paymentProvider = newProvider;
+        }
+
+        public processPayment() {
+            this.paymentProvider.pay();
+        }
+    }
+
+    const processor = new PaymentProcessor(new PayPal());
+    processor.processPayment();
+
+    processor.setPaymentProvider(new Stripe());
+    processor.processPayment();
+    ```
+
+## When to use
+
+-   When you want to use one of several, similar behaviors dynamically among several subclasses
+
+## Benefits
+
+-   Prevents changes on one class from affecting other classes
+
+-   Reduces long if/else and switch statements
+    ```
+    if (this.canFly) {
+        ...
+    } else if (this.cantFly) {
+        ...
+    } else if (this.superFlys) {
+        ...
+    }
+    ```
+
+## Downsides
+
+-   Increased number of interfaces/classes
