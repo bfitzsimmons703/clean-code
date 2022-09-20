@@ -1,8 +1,20 @@
 # OOP Basics
 
+A paradigm of programming that aims to model the real word.
+Three parts:
+
+-   Encapsulation
+-   Inheritance
+-   Polymorphism
+
+## Encapsulation
+
+-   Lets us draw a line around cohesive sets of data and relevant functions.
+-   Fields and methods are tied to their encapsulating classes, and can be public or private
+
 ## Inheritance
 
--   Subclasses inherit the properties and methods of parent class
+-   Subclasses inherit the properties and methods of a super class
 
 ```
 export class Animal {
@@ -51,7 +63,7 @@ console.log(cat.getSound()); //meow
 
 ## Polymorphism
 
--   Allows subclasses to change/add methods without affecting parent class
+-   Allows subclasses to change/add methods without affecting super class
 
     ```
     const dog: Dog = new Dog();
@@ -60,6 +72,12 @@ console.log(cat.getSound()); //meow
     const dog: Animal = new Dog();
     dog.digHole(); //Does NOT work. Animal class does not know about the digHole method
     ```
+
+-   This lets our classes access objects of the a different type through the same interface, so we can change the implementations of those objects without having to change the class that accesses them.
+-   Part of the _Dependency Inversion Principle_: High level modules should not depend on low level modules, they should depend on abstractions
+    ![Depedency Inversion](/dependency-inversion-uml.png)
+    -   Here, the Server class just cares about the Repository Interface, not the subclasses that implement it. So we can add/change without affecting the Server class.
+    -   See [Strategy Design Pattern](/design-patterns/strategy)
 
 ## Abstract Classes
 
