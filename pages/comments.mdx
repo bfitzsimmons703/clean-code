@@ -1,0 +1,35 @@
+# Comments
+
+-   Comments are necessary when the code itself doesn't express our ideas well enough
+    -   And even then, think about ways to make the code clearer before turning to comments
+
+## Having no comments is better than having bad/incorrect comments
+
+## Clear code with few comments > complex code with lots of comments
+
+-   Bad
+    ```
+    if ((employee.flags & HOURLY_FLAG) && employee.age > 64) {...}
+    ```
+-   Better
+    ```
+    if (employee.isEligibleForBenefits()) {...}
+    ```
+
+## Acceptable Comments
+
+-   Examples of input/output
+-   Legal comments (copyright, license, etc)
+-   Explanation of intent
+    -   Example:
+        ```
+        function testConcurrentDBConnections() {
+            // We want to test multiple connections to our database at once, and this is the best way to do it in the dev environment
+            for (let i = 0; i < 25; i++) {
+                const dbConn = new DBConn();
+                dbConn.ping();
+            }
+        }
+        ```
+-   TODOs (though really you should just do it up front)
+-   JSDocs for public APIs
