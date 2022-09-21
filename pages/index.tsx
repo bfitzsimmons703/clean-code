@@ -8,7 +8,8 @@ interface PageLink {
 }
 
 interface PageProps {
-	pageLinks: PageLink[];
+	tutorials: PageLink[];
+	sources: PageLink[];
 }
 
 const upperCaseWord = (word: string): string => word[0].toUpperCase() + word.slice(1);
@@ -32,7 +33,7 @@ export const getStaticProps = async () => {
 		return files;
 	};
 
-	const pageLinks: PageLink[] = getFilesRecursively(dir)
+	const tutorials: PageLink[] = getFilesRecursively(dir)
 		.filter((file) => file.endsWith('.mdx'))
 		.map((file) => {
 			const href = file.split('.')[0].slice(1); //remove extension and starting slash
@@ -43,19 +44,50 @@ export const getStaticProps = async () => {
 			};
 		});
 
-	const props: PageProps = { pageLinks };
+	const sources: PageLink[] = [
+		{
+			href: 'https://a.co/d/bMGqyFY',
+			title: 'Clean Code by Robert C. Martin',
+		},
+		{
+			href: 'https://a.co/d/5kQ1CV0',
+			title: 'Clean Architecture by Robert C. Martin',
+		},
+		{
+			href: 'https://refactoring.guru/',
+			title: 'Refactoring.guru',
+		},
+		{
+			href: 'https://www.youtube.com/playlist?list=PLF206E906175C7E07',
+			title: 'Design Patterns Video Tutorial by Derek Banas',
+		},
+	];
+
+	const props: PageProps = { tutorials, sources };
 	return { props };
 };
 
-const Home = ({ pageLinks }: PageProps) => {
+const Home = ({ tutorials, sources }: PageProps) => {
 	return (
 		<div>
+			<p>Tutorials:</p>
 			<ul>
-				{pageLinks.map((link) => (
+				{tutorials.map((link) => (
 					<li key={link.href}>
 						<Link href={`/${link.href}`}>
 							<a>{link.title}</a>
 						</Link>
+					</li>
+				))}
+			</ul>
+
+			<p>Sources:</p>
+			<ul>
+				{sources.map((link) => (
+					<li key={link.href}>
+						<a href={link.href} target='_blank' rel='noreferrer'>
+							{link.title}
+						</a>
 					</li>
 				))}
 			</ul>
