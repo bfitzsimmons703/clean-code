@@ -1,10 +1,14 @@
 # Strategy Design Pattern
 
-You define a family of algorithms (like different payment providers or scoring algorithms) in _separate_ classes and make them interchangeable.
+-   You define a family of algorithms (like different payment providers or scoring algorithms) in _separate_ classes and make them interchangeable.
+-   Classes can choose whatever implementation of the algorithm they want, and update them at runtime. Leverages composition, since the implementation is a class property.
+-   This lets you add functionality to superclasses without breaking subclasses.
+-   UML Diagram:
+    -   ![Strategy Design Pattern UML](/strategy-uml.png)
 
-Classes can choose whatever implementation of the algorithm they want, and update them at runtime. Leverages composition, since the implementation is a class property.
+## When to use
 
-This lets you add functionality to superclasses without breaking subclasses.
+-   When you want to use one of several, similar behaviors dynamically among several subclasses
 
 ## Example 1: If you have a superclass `Animal` and two subclasses, `Dog` and `Bird`, how do you add a `fly()` method?
 
@@ -196,10 +200,6 @@ This lets you add functionality to superclasses without breaking subclasses.
     processor.setPaymentProvider(new Stripe());
     processor.processPayment();
     ```
-
-## When to use
-
--   When you want to use one of several, similar behaviors dynamically among several subclasses
 
 ## Benefits
 

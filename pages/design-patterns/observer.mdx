@@ -1,0 +1,106 @@
+# Observer Design Pattern
+
+-   Subscribers (Observers) and Publishers (Subjects)
+-   The publisher doesn't need to know anything about the subscribers
+-   UML Diagram:
+    -   ![Observer Pattern UML](/observer-uml.png)
+-   The publisher/subject maintains a list of subscribers/observers, which all implement a common interface, and notifies them of changes
+
+## When to use
+
+-   When you need many objects to receive updates when another object changes
+
+## Example
+
+    ```
+    interface Subject {
+        register(observer: Observer): void;
+        unregister(observer: Observer): void;
+        notifyObservers(): void;
+    }
+
+    interface Observer {
+        update(stock: StockPrice): void;
+    }
+
+    enum TICKER {
+        APPLE = 'AAPL',
+        GOOGLE = 'GOOG',
+        MICROSOFT = 'MSFT',
+    }
+
+    interface StockPrice {
+        ticker: TICKER;
+        price: number;
+    }
+
+    class StockMarket implements Subject {
+        private observers: Observer[] = [];
+        private stocks: StockPrice[] = [];
+
+        register(observer: Observer): void {
+            this.observers.push(observer);
+        }
+
+        unregister(observer: Observer): void {
+            console.log(`Removing observer`);
+            this.observers = this.observers.filter((o) => o !== observer);
+        }
+
+        notifyObservers(): void {
+            // Notify observers of newest stock price
+            for (const observer of this.observers) {
+                observer.update(this.stocks[this.stocks.length - 1]);
+            }
+        }
+
+        addStock(newStock: StockPrice): void {
+            this.stocks.push(newStock);
+            this.notifyObservers();
+        }
+    }
+
+    class StockObserver implements Observer {
+        private ticker: TICKER;
+        private stockMarket: Subject;
+
+        constructor(ticker: TICKER, stockMarket: Subject) {
+            this.ticker = ticker;
+            this.stockMarket = stockMarket;
+            this.stockMarket.register(this);
+        }
+
+        update(stock: StockPrice): void {
+            if (stock.ticker === this.ticker) {
+                console.log(`Updated ${this.ticker} stock price: ${stock.price}`);
+            }
+        }
+    }
+
+    const stockMarket = new StockMarket();
+    const appleObserver = new StockObserver(TICKER.APPLE, stockMarket);
+    const googleObserver = new StockObserver(TICKER.GOOGLE, stockMarket);
+    const microsoftObserver = new StockObserver(TICKER.MICROSOFT, stockMarket);
+
+    stockMarket.addStock({
+        ticker: TICKER.APPLE,
+        price: 10.0,
+    });
+
+    stockMarket.addStock({
+        ticker: TICKER.GOOGLE,
+        price: 8.0,
+    });
+
+    stockMarket.unregister(appleObserver);
+
+    // Nothing looking at apple now
+    stockMarket.addStock({
+        ticker: TICKER.APPLE,
+        price: 10.0,
+    });
+    ```
+
+## Downsides
+
+-   The publisher might emit events that some subscribers don't care about

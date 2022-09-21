@@ -1,6 +1,6 @@
 # Functions
 
-### Functions should be small
+## Functions should be small
 
 -   20-30 lines max
 -   1-2 levels of indentation, and blocks within conditionals should be functions themselves
@@ -31,7 +31,7 @@
         }
         ```
 
-### Functions should do ONE thing, and do it well
+## Functions should do ONE thing, and do it well
 
     -   The content should perform work that is ONE level of abstraction below the function name
     -   A good test: see if you can extract contents of the function into another function that has a meaningfully different name
@@ -92,18 +92,18 @@
             console.log(game.calculateScore());
             ```
 
-### Stepdown Rule: Code should read like a set of top-down "TO" statements
+## Stepdown Rule: Code should read like a set of top-down "TO" statements
 
     > To get the top user score, we get all user scores
     >
     > > To get all user scores, we query the database
 
-### Use Descriptive Names
+## Use Descriptive Names
 
     - The name should reflect what the function does. Devs should not be surprised.
     - Long descriptive names are better than short confusing names
 
-### Max 3 arguments to a single function
+## Max 3 arguments to a single function
 
     - The more arguments you have, the harder it is to test all combinations of those arguments
     - If you have more, use an object
@@ -122,7 +122,7 @@
         }) {}
         ```
 
-### Avoid side effects
+## Avoid side effects
 
     - Your function name says it does one thing, but it does a hidden other thing
 
@@ -167,11 +167,11 @@
         }
         ```
 
-### Avoid Flag/Boolean arguments.
+## Avoid Flag/Boolean arguments.
 
     - Just make two functions
 
-### Separate Commands from Queries
+## Separate Commands from Queries
 
     - Bad
         ```
@@ -191,7 +191,7 @@
         }
         ```
 
-### Separate Try/Catch block logic into their own functions
+## Separate Try/Catch block logic into their own functions
 
     - A function with a try/catch block should have nothing before the try, nothing after the catch
     - Bad
@@ -221,6 +221,6 @@
         }
         ```
 
-### DRY
+## DRY
 
     - Don't Repeat Yourself

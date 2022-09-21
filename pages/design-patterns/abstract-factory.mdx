@@ -1,0 +1,264 @@
+# Abstract Factory Design Pattern
+
+-   Like a Factory, but EVERYTHING is encapsulated
+    -   The method that orders the object
+    -   The factories that build the object
+    -   The final objects
+        -   which contain objects that use the [Strategy Design Pattern](/design-patterns/strategy) through composition
+-   Allows you to create families of related objects without creating specific concrete classes for those objects
+
+## When to use
+
+-   When you have many objects that can be added or changed during runtime
+
+## Downsides
+
+-   Things can get complicated quickly.
+
+## Example 1 - GPU and Monitor Manufacturers
+
+-   UML Diagram:
+    -   ![Abstract Factory Pattern UML](/abstract-factory-uml.png)
+
+```
+// Declare interfaces for each distinct product we have
+interface GPU {
+	assemble(): void;
+}
+
+interface Monitor {
+	assemble(): void;
+}
+
+abstract class Manufacturer {
+	public assembleGPU(): GPU {
+		const gpu = this.createGPU();
+		gpu.assemble();
+		return gpu;
+	}
+
+	public assembleMonitor(): GPU {
+		const gpu = this.createGPU();
+		gpu.assemble();
+		return gpu;
+	}
+
+	public assembleBundle(): [GPU, Monitor] {
+		return [this.assembleGPU(), this.assembleMonitor()];
+	}
+
+	abstract createGPU(): GPU;
+	abstract createMonitor(): Monitor;
+}
+
+class NvidiaGPU implements GPU {
+	assemble(): void {
+		console.log(`Assembling Nvidia GUP`);
+	}
+}
+
+class NvidiaMonitor implements Monitor {
+	assemble(): void {
+		console.log(`Assembling Nvidia Monitor`);
+	}
+}
+
+class NvidiaManufacturer extends Manufacturer {
+	createGPU(): GPU {
+		return new NvidiaGPU();
+	}
+
+	createMonitor(): Monitor {
+		return new NvidiaMonitor();
+	}
+}
+
+class AsusGPU implements GPU {
+	assemble(): void {
+		console.log(`Assembling Asus GUP`);
+	}
+}
+
+class AsusMonitor implements Monitor {
+	assemble(): void {
+		console.log(`Assembling Asus Monitor`);
+	}
+}
+
+class AsusManufacturer extends Manufacturer {
+	createGPU(): GPU {
+		return new AsusGPU();
+	}
+
+	createMonitor(): Monitor {
+		return new AsusMonitor();
+	}
+}
+```
+
+## Example 2: game with enemy ship types
+
+```
+enum EnemyShipType {
+	UFO = 'ufo',
+	UFOBoss = 'ufoboss',
+}
+
+abstract class EnemyShipBuilding {
+	protected abstract makeEnemyShip(shipType: EnemyShipType): EnemyShip;
+
+	// What the client initially calls
+	public orderShip(shipType: EnemyShipType): EnemyShip {
+		const ship = this.makeEnemyShip(shipType);
+		ship.build();
+		return ship;
+	}
+}
+
+class UFOEnemyShipBuilding extends EnemyShipBuilding {
+	protected makeEnemyShip(shipType: EnemyShipType): EnemyShip {
+		let ship: EnemyShip;
+		if (shipType === EnemyShipType.UFO) {
+			const shipPartsFactory = new UFOEnemyShipFactory();
+			ship = new UFOEnemyShip(shipPartsFactory);
+			ship.setType(EnemyShipType.UFO);
+		} else if (shipType === EnemyShipType.UFOBoss) {
+			const shipPartsFactory = new UFOBossEnemyShipFactory();
+			ship = new UFOBossEnemyShip(shipPartsFactory);
+			ship.setType(EnemyShipType.UFOBoss);
+		} else {
+			throw new Error('Unknown UFO type');
+		}
+
+		return ship;
+	}
+}
+
+interface Weapon {
+	toString(): string;
+}
+
+interface Engine {
+	toString(): string;
+}
+
+// Required parts for all enemy ships
+interface EnemyShipFactory {
+	addGun(): Weapon;
+	addEngine(): Engine;
+}
+
+abstract class EnemyShip {
+	protected type!: EnemyShipType;
+	protected weapon!: Weapon;
+	protected engine!: Engine;
+
+	public getType(): string {
+		return this.type;
+	}
+
+	public setType(newType: EnemyShipType): void {
+		this.type = newType;
+	}
+
+	public toString(): string {
+		return `Enemy ship ${this.type} has the ${this.engine} engine and the ${this.weapon} weapon system`;
+	}
+
+	public attack(): void {
+		console.log(`${this.type} is attacking with its ${this.weapon.toString()}!`);
+	}
+
+	public followHeroShip(): void {
+		console.log(`${this.type} is following our hero with its ${this.engine.toString()}!`);
+	}
+
+	abstract build(): void;
+}
+
+class UFOGun implements Weapon {
+	toString(): string {
+		return 'UFO Basic Gun';
+	}
+}
+
+class UFOEngine implements Engine {
+	toString(): string {
+		return 'UFO Engine Mk. I';
+	}
+}
+
+class UFOEnemyShipFactory implements EnemyShipFactory {
+	addGun(): Weapon {
+		return new UFOGun();
+	}
+	addEngine(): Engine {
+		return new UFOEngine();
+	}
+}
+
+class UFOEnemyShip extends EnemyShip {
+	shipFactory: EnemyShipFactory;
+
+	constructor(shipFactory: EnemyShipFactory) {
+		super();
+		this.shipFactory = shipFactory;
+	}
+
+	build(): void {
+		console.log(`Making a ${this.type} ship`);
+		this.weapon = this.shipFactory.addGun();
+		this.engine = this.shipFactory.addEngine();
+	}
+}
+
+class UFOBossGun implements Weapon {
+	toString(): string {
+		return 'UFO Boss Gattling Gun';
+	}
+}
+
+class UFOBossEngine implements Engine {
+	toString(): string {
+		return 'UFO Ion Nuclear Hyperspace Engine';
+	}
+}
+
+class UFOBossEnemyShipFactory implements EnemyShipFactory {
+	addGun(): Weapon {
+		return new UFOBossGun();
+	}
+	addEngine(): Engine {
+		return new UFOBossEngine();
+	}
+}
+
+class UFOBossEnemyShip extends EnemyShip {
+	shipFactory: EnemyShipFactory;
+
+	constructor(shipFactory: EnemyShipFactory) {
+		super();
+		this.shipFactory = shipFactory;
+	}
+
+	build(): void {
+		console.log(`Making a ${this.type} ship`);
+		this.weapon = this.shipFactory.addGun();
+		this.engine = this.shipFactory.addEngine();
+	}
+}
+
+{
+	const builder = new UFOEnemyShipBuilding();
+	const ufo = builder.orderShip(EnemyShipType.UFO);
+	ufo.followHeroShip();
+	ufo.attack();
+	console.log(ufo.toString());
+
+	console.log('----------------------');
+
+	const boss = builder.orderShip(EnemyShipType.UFOBoss);
+	boss.followHeroShip();
+	boss.attack();
+}
+```

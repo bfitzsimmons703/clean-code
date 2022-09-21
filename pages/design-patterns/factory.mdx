@@ -1,0 +1,110 @@
+# Factory Design Pattern
+
+-   A method to return one of several classes that share a common superclass
+-   Returned class is chosen at runtime
+-   UML Diagram:
+    -   ![Factory Design Pattern UML](/factory-uml.png)
+
+## When to use
+
+-   When you don't know ahead of time which subclass you might need (example: choosing a random enemy type during a game)
+-   To centralize class selection code and encapsulate class creation
+
+## Example - game with enemy ship types
+
+```
+enum EnemyShipType {
+	UFO = 'ufo',
+	Rocket = 'rocket',
+	UFOBoss = 'ufoboss',
+}
+
+abstract class EnemyShip {
+	private type!: EnemyShipType;
+	private damage!: number;
+
+	public getType(): string {
+		return this.type;
+	}
+	public setType(newType: EnemyShipType): void {
+		this.type = newType;
+	}
+
+	public getDamage(): number {
+		return this.damage;
+	}
+	public setDamage(newDamage: number): void {
+		this.damage = newDamage;
+	}
+
+	public followHeroShip(): void {
+		console.log(`${this.type} is honing in on our hero!`);
+	}
+
+	public attack(): void {
+		console.log(`${this.type} is attacking with ${this.damage} damage!`);
+	}
+}
+
+class UFOEnemyShip extends EnemyShip {
+	constructor() {
+		super();
+		this.setType(EnemyShipType.UFO);
+		this.setDamage(20);
+	}
+}
+
+class UFOBossEnemyShip extends UFOEnemyShip {
+	constructor() {
+		super();
+		this.setType(EnemyShipType.UFOBoss);
+		this.setDamage(50);
+	}
+}
+
+class RocketEnemyShip extends EnemyShip {
+	constructor() {
+		super();
+		this.setType(EnemyShipType.Rocket);
+		this.setDamage(10);
+	}
+}
+
+// Bad - you have to modify this main program every time you want to add an enemy type with more if-else blocks
+{
+	let userInput: string = 'ufo'; //simulates user input selecting an enemy type
+	let enemy: EnemyShip;
+	if (userInput === EnemyShipType.UFO.valueOf()) {
+		enemy = new UFOEnemyShip();
+	} else if (userInput === EnemyShipType.Rocket.valueOf()) {
+		enemy = new RocketEnemyShip();
+	} else {
+		throw new Error('Unknown enemy type');
+	}
+
+	enemy.attack();
+}
+
+// Better - completely encapsulates ship creation
+class EnemyShipFactory {
+	static makeEnemeyShip(shipType: string): EnemyShip {
+		switch (shipType) {
+			case EnemyShipType.UFO.valueOf():
+				return new UFOEnemyShip();
+			case EnemyShipType.Rocket.valueOf():
+				return new RocketEnemyShip();
+			case EnemyShipType.UFOBoss.valueOf():
+				return new UFOBossEnemyShip();
+			default:
+				throw new Error('Unknown type');
+		}
+	}
+}
+
+{
+	let userInput = 'ufoboss'; //simulates user input selecting an enemy type
+	const enemy = EnemyShipFactory.makeEnemeyShip(userInput);
+	enemy.attack();
+}
+
+```

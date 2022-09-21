@@ -63,7 +63,9 @@ console.log(cat.getSound()); //meow
 
 ## Polymorphism
 
--   Allows subclasses to change/add methods without affecting super class
+-   Ability of objects to assume multiple forms while meeting the requirements of some base form.
+-   ![Polymorphism UML](/polymorphism-uml.png)
+-   Also allows subclasses to change/add methods without affecting super class
 
     ```
     const dog: Dog = new Dog();
@@ -74,7 +76,7 @@ console.log(cat.getSound()); //meow
     ```
 
 -   This lets our classes access objects of the a different type through the same interface, so we can change the implementations of those objects without having to change the class that accesses them.
--   Part of the _Dependency Inversion Principle_: High level modules should not depend on low level modules, they should depend on abstractions
+-   Enables the _Dependency Inversion Principle_: High level modules should not depend on low level modules, they should depend on abstractions
     ![Depedency Inversion](/dependency-inversion-uml.png)
     -   Here, the Server class just cares about the Repository Interface, not the subclasses that implement it. So we can add/change without affecting the Server class.
     -   See [Strategy Design Pattern](/design-patterns/strategy)
