@@ -1,0 +1,32 @@
+# Formatting
+
+-   Most important point: have a set of team rules that everyone sticks to.
+-   Example: ESLint config file
+
+## Newspaper metaphor
+
+-   Put the most important information at the top!
+-   Should read like a newpaper column:
+    -   Descriptive name up top to give you a general overview of what you're reading
+    -   High level details below that
+    -   Low level details towards the bottom
+
+## Related concepts should occupy the same vertical space. Separate concepts should have empty lines between them.
+
+## Dependent functions should be vertically close, with the calling function ABOVE the called function.
+
+    - This gives the code a nice vertical reading flow, where high level functions are above low level functions.
+
+## Indent short `if/while` blocks
+
+    - Easier to read in the long run.
+    - Bad
+        ```
+        if (x > 0) return;
+        ```
+    - Better
+        ```
+        if (x > 0) {
+            return;
+        }
+        ```
