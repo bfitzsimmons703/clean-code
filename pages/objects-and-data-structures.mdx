@@ -1,0 +1,261 @@
+# Objects and Data Structures
+
+-   Objects/Classes hide data and expose behavior.
+    -   They abstract away internal data and instead provide meaningful functions for interacting with that data.
+-   Data Structures expose their data but have no meaningful functions/behavior
+    -   I.E. classes with just public variables and no methods.
+-   Avoid hybrids of the two!
+
+## Data Abstraction
+
+    - Hide the low level implementations of a class. Don't expose the details.
+    - Bad
+        ```
+        class Point {
+            public x: number;
+            public y: number;
+        }
+
+        const point = new Point(0,0);
+        point.x = 10; //you have access to the implementation details!
+        ```
+    - Better
+        ```
+        class Point {
+            private x: number;
+            private y: number;
+            public setCoordinates(x: number, y: number) {
+                this.x = x;
+                this.y = y;
+            }
+        }
+
+        const point = new Point();
+        point.setCoordinates(10, 10); //we now access the coordinates through an abstraction
+        ```
+    - More than hiding variables behind getters/setters. All about hiding them behind abstractions that get at the essence of the data.
+    - Bad
+        ```
+        interface Car {
+            getFuelCapacityInGallons(): number;
+            getCurrentGallonsOfFuel(): number;
+        }
+        ```
+    - Better
+        ```
+        interface Car {
+            getPercentFuelRemaining(): number;
+        }
+        ```
+
+## Data Structure vs Object in code
+
+### **Procedural Code** = code that uses data structures
+
+-   Example:
+
+    ```
+    // Data structure
+    class Square {
+        sideLength!: number;
+    }
+
+    // Data structure
+    class Circle {
+        radius!: number;
+    }
+
+    // Object
+    class Geometry {
+        public getArea(shape: any): number {
+            if (shape instanceof Square) {
+                return Math.pow(shape.sideLength, 2);
+            } else if (shape instanceof Circle) {
+                return Math.PI * Math.pow(shape.radius, 2);
+            } else {
+                throw new Error('Unknown shape');
+            }
+        }
+    }
+    ```
+
+    -   If I add a new `perimiter()` method to `Geometry`, that's easy, because none of the `Shape` data structures are affected. Nor is any class that uses `Shape`.
+    -   If I add a new `Shape` though, I need to update all the `Geometry` methods to deal with it.
+
+### _Procedural code makes it easy to add new functions without affecting existing data structures, but harder to add new data structures without affecting existing functions._
+
+    - We can add a new `perimeter()` method to Geometry without affecting the shape classes
+    - But we can't add new shape classes without affecting the existing `getArea()` function on Geometry
+
+### **Object Oriented Code** = code that uses objects/classes
+
+-   Example:
+
+    ```
+    interface Shape {
+        getArea(): number;
+    }
+
+    // Object
+    class Square implements Shape {
+        sideLength!: number;
+        getArea(): number {
+            return this.sideLength * this.sideLength;
+        }
+    }
+
+    // Object
+    class Circle implements Shape {
+        radius!: number;
+        getArea(): number {
+            return Math.PI * Math.pow(this.radius, 2);
+        }
+    }
+    ```
+
+    -   Polymorphic, so I don't need a separate `Geometry` class.
+    -   Now, if I add a new shape, no existing shape functions are affected.
+    -   BUT, if I add a new function, all of the existing shapes must be updated.
+        -   I.E. adding a new `perimeter()` method to the `Shape` interface.
+
+### _OO Code makes it easy to add new data structures without affecting existing functions, but harder to add new functions without affecting existing data structures._
+
+    - We can add new shapes without affecting any existing shape's `getArea()` function.
+    - But we can't add a new `perimiter()` function without updating all existing shapes.
+
+### So if you want to add new data structures (types) a lot, use OO. If you want to add new functions and new behaviors, use procedural.
+
+## Law of Demeter:
+
+-   All about hiding internal implementations of objects from functions that use those objects.
+-   More precisely, a method _f_ of class **C** should only invoke methods of:
+
+    -   The class **C**
+
+        ```
+        class C {
+            foo() {
+                this.bar();
+            }
+
+            bar() {
+                //...
+            }
+        }
+        ```
+
+    -   An object created by _f_
+        ```
+        class C {
+            foo() {
+                const bar = new Bar();
+                bar.run();
+            }
+        }
+        ```
+    -   An object passed in to _f_
+        ```
+        class C {
+            foo(obj: Object) {
+                obj.bar();
+            }
+        }
+        ```
+    -   An object held as an instance variable of **C**
+        ```
+        class C {
+            this.bar: Object = new Object();
+            foo() {
+                this.bar.run();
+            }
+        }
+        ```
+
+### When you have an object, you tell it to _do something_. You don't ask about its internals.
+
+## DTOs and Active Records
+
+-   Data Transfer Objects (DTOs) are the essential form of data structures - classes with just public variables and no methods.
+    -   Think JavaScript objects
+    -   Good for transferring data bewteen APIs or databases
+-   Active Records are DTOs that translate to/from a database table, and often have `save()`, `find()`, and other navigational methods.
+    -   They should NOT have business logic beyond that though.
+-   **Example**: Instead of having a `User` class with private variables that map to database columns, plus a hundred methods around the concept of a "user",
+    make the `User` class an Active Record.
+    Then, create other "business logic" classes that hold the `User` data structure internally and do whatever operations you need around that, hiding it behind abstractions.
+
+    -   Bad
+
+        ```
+        // All encompassing "User" class
+        class User {
+            private name!: string;
+            private database: any;
+
+            public getName(): string {
+                return this.name;
+            }
+
+            public setName(newName: string) {
+                this.name = newName;
+            }
+
+            public save(): void {
+                this.database.query('INSERT INTO ...');
+            }
+
+            public login(): void {
+                console.log(`Logging in user`);
+            }
+
+            public getUserSession(): object {
+                return {
+                    name: this.getName(),
+                    loginTime: Date.now(),
+                };
+            }
+        }
+        ```
+
+    -   Better
+
+        ```
+        // Active Record
+        class User {
+            private database: any;
+            private name!: string;
+
+            public getName(): string {
+                return this.name;
+            }
+
+            public setName(newName: string) {
+                this.name = newName;
+            }
+
+            public save() {
+                this.database.query('INSERT INTO ...');
+            }
+
+            public find() {
+                this.database.query('SELECT name FROM ...');
+            }
+        }
+
+        // Business logic class. Hides away internal "user" data structure and just exposes behavior around that user
+        class UserSession {
+            user!: User; //an active record
+            sessionStore: any;
+
+            loginUser() {
+                this.sessionStore.add(this.user);
+            }
+
+            getUserSession(): object {
+                return {
+                    name: this.user.getName(),
+                    time: Date.now(),
+                };
+            }
+        }
+        ```
