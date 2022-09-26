@@ -1,15 +1,15 @@
 import Link from 'next/link';
 import path from 'path';
-import fs from 'fs';
+import fs, { readFileSync } from 'fs';
 
-interface PageLink {
+interface TutorialLink {
 	href: string;
 	title: string;
 }
 
 interface PageProps {
-	tutorials: PageLink[];
-	sources: PageLink[];
+	tutorialGroups: [string, TutorialLink[]][];
+	sources: TutorialLink[];
 }
 
 const upperCaseWord = (word: string): string => word[0].toUpperCase() + word.slice(1);
@@ -33,28 +33,31 @@ export const getStaticProps = async () => {
 		return files;
 	};
 
-	const tutorials: PageLink[] = getFilesRecursively(dir)
+	const tutorialGroups = new Map<string, TutorialLink[]>();
+	getFilesRecursively(dir)
 		.filter((file) => file.endsWith('.mdx'))
-		.map((file) => {
+		.forEach((file) => {
 			const href = file.split('.')[0].slice(1); //remove extension and starting slash
-			let title = href.split('-').map(upperCaseWord).join(' ');
+			const filePath = path.join(dir, file);
+			const fileContents = readFileSync(filePath, 'utf8');
+			const fileLines = fileContents.split('\n');
+			const title = fileLines[0].replace('#', ''); //the first line of every MDX file is the title, marked by a `#`
 
-			if (title.indexOf('/') >= 0) {
-				// A tutorial from one of the sub folders, ie design-patterns/factory.
-				// Need to do a little extra processing to capitalize the "f" in factory there
-				const parts = title.split('/');
-				const groupName = parts[0];
-				const tutorialName = parts[1];
-				title = groupName + ' - ' + upperCaseWord(tutorialName);
+			let group;
+			const hrefParts = href.split('/');
+			if (hrefParts.length > 1) {
+				group = hrefParts[0].split('-').map(upperCaseWord).join(' ');
+			} else {
+				group = 'Clean Code';
 			}
 
-			return {
-				href,
-				title,
-			};
+			const tutorials = tutorialGroups.get(group) || [];
+			tutorials.push({ href, title });
+
+			tutorialGroups.set(group, tutorials);
 		});
 
-	const sources: PageLink[] = [
+	const sources: TutorialLink[] = [
 		{
 			href: 'https://a.co/d/bMGqyFY',
 			title: 'Clean Code by Robert C. Martin',
@@ -73,24 +76,33 @@ export const getStaticProps = async () => {
 		},
 	];
 
-	const props: PageProps = { tutorials, sources };
+	const props: PageProps = {
+		//Next.js can't serialize Maps, so converting to an array
+		tutorialGroups: Array.from(tutorialGroups),
+		sources,
+	};
 	return { props };
 };
 
-const Home = ({ tutorials, sources }: PageProps) => {
+const Home = ({ tutorialGroups, sources }: PageProps) => {
 	return (
 		<div>
-			<p>Tutorials:</p>
-			<ul>
-				{tutorials.map((link) => (
-					<li key={link.href}>
-						<Link href={`/${link.href}`}>
-							<a>{link.title}</a>
-						</Link>
-					</li>
-				))}
-			</ul>
+			{tutorialGroups.map(([groupName, tutorialLinks]) => (
+				<div key={groupName}>
+					<h4>{groupName}</h4>
+					<ul>
+						{tutorialLinks.map((link) => (
+							<li key={link.href}>
+								<Link href={`/${link.href}`}>
+									<a>{link.title}</a>
+								</Link>
+							</li>
+						))}
+					</ul>
+				</div>
+			))}
 
+			<hr />
 			<p>Sources:</p>
 			<ul>
 				{sources.map((link) => (
