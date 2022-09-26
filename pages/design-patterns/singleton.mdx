@@ -1,7 +1,13 @@
+# Singleton
+
+-   A type of class that you can instantiate only _once_ during the entire lifecycle of your app.
+    -   Example: a database pool class.
+
+```
 // Should only ever reach 1
 let instanceCount = 0;
 
-export class Singleton {
+class Singleton {
 	// the single instance
 	private static instance: Singleton | null = null;
 
@@ -28,3 +34,6 @@ console.log(instanceCount); // still 1, since we already instantiated the class
 
 const instance3 = Singleton.getInstance();
 console.log(instanceCount); // still 1 again
+```
+
+-   The `instanceCount` variable increments just once, when the first and only instance is created.
