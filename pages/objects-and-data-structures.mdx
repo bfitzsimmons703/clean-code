@@ -128,6 +128,32 @@
 ## Law of Demeter:
 
 -   All about hiding internal implementations of objects from functions that use those objects.
+-   "An object should only talk with its friends."
+
+    -   Bad
+
+        ```
+        class Foo {
+            car: Car; //a "friend" of Foo
+
+            bar() {
+                car.parts.engine.ignition.ignite(); //this code is easy to break! Car internals could change
+            }
+        }
+        ```
+
+    -   Better
+
+        ```
+        class Foo {
+            car: Car; //still a "friend" of Foo
+
+            bar() {
+                car.startEngine(); //abstract internals away inside the Car class, which is a "friend"
+            }
+        }
+        ```
+
 -   More precisely, a method _f_ of class **C** should only invoke methods of:
 
     -   The class **C**
