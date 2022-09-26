@@ -37,7 +37,17 @@ export const getStaticProps = async () => {
 		.filter((file) => file.endsWith('.mdx'))
 		.map((file) => {
 			const href = file.split('.')[0].slice(1); //remove extension and starting slash
-			const title = href.split('-').map(upperCaseWord).join(' ');
+			let title = href.split('-').map(upperCaseWord).join(' ');
+
+			if (title.indexOf('/') >= 0) {
+				// A tutorial from one of the sub folders, ie design-patterns/factory.
+				// Need to do a little extra processing to capitalize the "f" in factory there
+				const parts = title.split('/');
+				const groupName = parts[0];
+				const tutorialName = parts[1];
+				title = groupName + ' - ' + upperCaseWord(tutorialName);
+			}
+
 			return {
 				href,
 				title,

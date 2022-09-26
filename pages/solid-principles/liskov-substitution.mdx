@@ -1,0 +1,97 @@
+# Liskov Substitution Principle
+
+-   If "S" is a subtype of "T", then anywhere you use "T" you should be able to use "S"
+    -   Example: If you have a superclass `Bird` and a subclass `Penguin`, you should be able to use `Penguin` anywhere you use `Bird`
+-   Bad
+
+    ```
+    class Bird {
+        fly() {
+            console.log('Flying');
+        }
+    }
+
+    class Duck extends Bird {
+        quack() {
+            console.log('Quack quack');
+        }
+    }
+
+    class Penguin extends Bird {
+        swim() {
+            console.log('Swimming');
+        }
+
+        fly() {
+            throw new Error('I cannot fly!');
+        }
+    }
+
+    function makeBirdFly(bird: Bird) {
+        bird.fly();
+    }
+
+    const duck = new Duck();
+    const penguin = new Penguin();
+
+    makeBirdFly(duck);
+    makeBirdFly(penguin); //THROWS ERROR
+    ```
+
+    -   Violates the Liskov Substitution Principle because Penguin cannot be used wherever Bird is used!
+
+-   Better
+
+    ```
+    abstract class Bird {
+        movement!: BirdMovement;
+    }
+
+    interface BirdMovement {
+        move(): void;
+    }
+
+    class FlyingBird implements BirdMovement {
+        move(): void {
+            console.log('I AM FLYING');
+        }
+    }
+
+    class SwimmingBird implements BirdMovement {
+        move(): void {
+            console.log('I AM SWIMMING');
+        }
+    }
+
+    class Duck extends Bird {
+        movement: BirdMovement;
+        constructor(movement: BirdMovement) {
+            super();
+            this.movement = movement;
+        }
+
+        quack() {
+            console.log('Quack quack');
+        }
+    }
+
+    class Penguin extends Bird {
+        movement: BirdMovement;
+        constructor(movement: BirdMovement) {
+            super();
+            this.movement = movement;
+        }
+    }
+
+    function moveBird(bird: Bird) {
+        bird.movement.move();
+    }
+
+    const duck = new Duck(new FlyingBird());
+    const penguin = new Penguin(new SwimmingBird());
+
+    moveBird(duck);
+    moveBird(penguin);
+    ```
+
+    -   Uses the [Strategy Design Pattern](/design-patterns/strategy)

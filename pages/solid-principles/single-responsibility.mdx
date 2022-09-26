@@ -1,0 +1,43 @@
+# Single Responsibility Principle (SRP)
+
+-   **Separate code that different actors depend on**
+-   Example: Employee class
+
+    -   Bad
+        ```
+        class Employee {
+            calculatePay(); -> for the Accounting department
+            reportHours(); -> for the HR department
+            save(); -> for the IT department
+        }
+        ```
+        -   This violates the SRP because this class is now beholden to three different stakeholders, and has three reasons to change.
+        -   If `calculatePay()` and `reportHours()` share some common low level function that only Accounting wants to change,
+            it'll change for the HR department as well! Bad!
+        -   And if each actor wants a change, it'll be harder to merge those changes in the single source file.
+    -   Better
+
+        ```
+        // simple data structure, no methods
+        class EmployeeData {
+            id: number;
+            name: string;
+            hoursWorked: number;
+            hourlyRate: number;
+        }
+
+        // For Accounting
+        class PayCalculator {
+            calculatePay(employee: EmployeeData);
+        }
+
+        // For HR
+        class HourReporter {
+            reportHours(employee: EmployeeData);
+        }
+
+        // For IT
+        class EmployeeSaver {
+            save(employee: EmployeeData);
+        }
+        ```

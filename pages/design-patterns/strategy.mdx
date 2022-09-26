@@ -15,7 +15,7 @@
 -   Bad - add `fly()` method directly to `Animal` superclass
 
     ```
-    export abstract class Animal {
+    abstract class Animal {
         ...
 
         public fly(): void {
@@ -99,7 +99,7 @@
         }
     }
 
-    export abstract class Animal {
+    abstract class Animal {
         private flyingType!: Flys;
 
         public setFlyingType(newFlyingType: Flys): void {

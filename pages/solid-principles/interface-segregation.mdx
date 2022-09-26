@@ -1,0 +1,132 @@
+# Interface Segregation Principle
+
+-   Make your interfaces smaller and more specific, not giant and all-encompassing.
+
+-   Bad
+
+    ```
+    interface GameEntity {
+        name: string;
+        attackPower: number;
+        hp: number;
+        speed: number;
+
+        move(): void;
+        attack(): void;
+        takeDamage(): void;
+    }
+
+    class Player implements GameEntity {
+        name!: string;
+        attackPower!: number;
+        hp!: number;
+        speed!: number;
+
+        move(): void {
+            // move
+        }
+        attack(): void {
+            // attack
+        }
+        takeDamage(): void {
+            // take damage
+        }
+    }
+
+    class Turret implements GameEntity {
+        name!: string;
+        attackPower!: number;
+        hp!: number;
+        speed!: number;
+
+        move(): void {
+            throw new Error('TURRETS CANNOT MOVE');
+        }
+        attack(): void {
+            // attack
+        }
+        takeDamage(): void {
+            // take damage
+        }
+    }
+
+    const player = new Player();
+    const turret = new Turret();
+
+    player.move(); //ok
+    turret.move(); //throws error
+    ```
+
+    -   The `Turret` class has to implement `move`, but that doesn't make sense and so it throws an error.
+
+-   Better - break apart single big interface into several smaller ones
+
+    ```
+    abstract class GameEntity {
+        name!: string;
+    }
+
+    interface AttackingEntity {
+        attackPower: number;
+        attack(): void;
+    }
+
+    interface MovingEntity {
+        speed: number;
+        move(): void;
+    }
+
+    interface DamageableEntity {
+        hp: number;
+        takeDamage(): void;
+    }
+
+    class Player implements GameEntity, AttackingEntity, MovingEntity, DamageableEntity {
+        name: string;
+        attackPower: number;
+        hp: number;
+        speed: number;
+
+        constructor(name: string, attackPower: number, hp: number, speed: number) {
+            this.name = name;
+            this.attackPower = attackPower;
+            this.hp = hp;
+            this.speed = speed;
+        }
+
+        move(): void {
+            console.log('Moving');
+        }
+        attack(): void {
+            console.log('Attacking');
+        }
+        takeDamage(): void {
+            console.log('Taking damage');
+        }
+    }
+
+    class Turret implements GameEntity, AttackingEntity, DamageableEntity {
+        name: string;
+        attackPower: number;
+        hp: number;
+
+        constructor(name: string, attackPower: number, hp: number) {
+            this.name = name;
+            this.attackPower = attackPower;
+            this.hp = hp;
+        }
+
+        attack(): void {
+            console.log('Attacking');
+        }
+        takeDamage(): void {
+            console.log('Taking damage');
+        }
+    }
+
+    const player = new Player('Player 1', 10, 10, 10);
+    const turret = new Turret('Turret 1', 20, 40);
+
+    player.move(); //ok
+    turret.attack(); //ok
+    ```

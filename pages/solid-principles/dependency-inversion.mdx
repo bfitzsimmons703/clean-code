@@ -1,0 +1,117 @@
+# Dependency Inversion Principle
+
+-   You don't want your high level code to depend on low level code. Instead, depend on abstractions.
+-   Those abstractions, in turn, dictate how to implement the low level code. I.E. through interfaces.
+
+-   Example: Store
+
+    -   Bad
+
+        ```
+        class Stripe {
+            makePayment() {
+                console.log('Making stripe payment');
+            }
+
+            checkCreditCard() {
+                console.log('Checking stripe cc');
+            }
+
+            refund() {
+                console.log('Refunding stripe card');
+            }
+        }
+
+        class Store {
+            stripe: Stripe;
+
+            constructor(stripe: Stripe) {
+                this.stripe = stripe;
+            }
+
+            makePayment() {
+                this.stripe.makePayment();
+            }
+
+            checkCreditCard() {
+                this.stripe.checkCreditCard();
+            }
+
+            refund() {
+                this.stripe.refund();
+            }
+        }
+
+        const store = new Store(new Stripe());
+        store.checkCreditCard();
+        store.refund();
+        ```
+
+        -   High level `Store` directly depends on low level `Stripe`.
+        -   Would be very difficult to switch to another payment processor, because we'd need to update every method in the `Store` class.
+
+    -   Better
+
+        ```
+        interface PaymentProcessor {
+            makePayment(): void;
+            checkCreditCard(): void;
+            refund(): void;
+        }
+
+        class Stripe implements PaymentProcessor {
+            makePayment() {
+                console.log('Making stripe payment');
+            }
+
+            checkCreditCard() {
+                console.log('Checking stripe cc');
+            }
+
+            refund() {
+                console.log('Refunding stripe card');
+            }
+        }
+
+        class Paypal implements PaymentProcessor {
+            makePayment() {
+                console.log('Making paypal payment');
+            }
+
+            checkCreditCard() {
+                console.log('Checking paypal cc');
+            }
+
+            refund() {
+                console.log('Refunding paypal card');
+            }
+        }
+
+        class Store {
+            paymentProcessor: PaymentProcessor;
+
+            constructor(paymentProcessor: PaymentProcessor) {
+                this.paymentProcessor = paymentProcessor;
+            }
+
+            makePayment() {
+                this.paymentProcessor.makePayment();
+            }
+
+            checkCreditCard() {
+                this.paymentProcessor.checkCreditCard();
+            }
+
+            refund() {
+                this.paymentProcessor.refund();
+            }
+        }
+
+        const paymentProcessor = Math.random() < 0.5 ? new Stripe() : new Paypal();
+        const store = new Store(paymentProcessor);
+        store.checkCreditCard();
+        store.refund();
+        ```
+
+        -   Now the `Store` class depends on an abstraction (or wrapper) that sets guidelines for how to implement
+            the low level Stripe and Paypal classes.

@@ -17,7 +17,7 @@ Three parts:
 -   Subclasses inherit the properties and methods of a super class
 
 ```
-export class Animal {
+class Animal {
 	private sound: string = '';
 
 	public setSound(newSound: string): void {
@@ -87,7 +87,7 @@ console.log(cat.getSound()); //meow
 -   You can't instantiate abstract classes by themselves
 
     ```
-    export abstract class Creature {
+    abstract class Creature {
     	protected sound!: string;
 
     	public setSound(newSound: string): void {
@@ -129,7 +129,7 @@ console.log(cat.getSound()); //meow
 
     ---
 
-    export interface NamedCreature {
+    interface NamedCreature {
     	name: string;
     	printName: () => void;
     }
