@@ -1,0 +1,56 @@
+# Error Handling
+
+## Use Exceptions Rather than Return Codes
+
+-   Bad
+
+    ```
+    enum ResultStatus {
+        Success: 1,
+        Error: 2,
+    }
+
+    function foo() {
+        const result = getResult();
+        if (result.status === ResultStatus.Success) {
+            //
+        } else if (result.status === ResultStatus.Error) {
+            //
+        } else {
+            //
+        }
+    }
+    ```
+
+    -   You have to remember to check each status code
+    -   The error handling is in line with the result handling
+
+-   Better
+    ```
+    function foo() {
+        try {
+            const result = getResult();
+            //do stuff with result
+        } catch (e: Exception) {
+            logger.log(e);
+        }
+    }
+    ```
+    -   Separates the error handling from the result handling
+
+## Provide Context with your Exceptions
+
+-   Either through logging or comments
+
+## Define Exception classes in terms of the caller's needs
+
+-   Wrap third party APIs that throw their own esoteric exceptions with your own classes that throw exceptions your code can understand.
+
+## Don't Return Null!
+
+-   We're creating more work for ourselves because our calling code then needs to check if the result is null or not.
+-   If you forget to check if it's null or not, you can miss errors and get null pointer exceptions at runtime.
+
+## Don't Pass Null either!
+
+-   Because then we have to check if the arguments are null in our functions.
