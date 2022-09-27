@@ -1,9 +1,19 @@
 # Dependency Inversion Principle
 
--   You don't want your high level code to depend on low level code. Instead, depend on abstractions.
+-   The most flexible system is one that depends on abstractions, not concretions.
+    -   So you should only import interfaces or abstract classes, not concrete classes.
 -   Those abstractions, in turn, dictate how to implement the low level code. I.E. through interfaces.
 
--   Example: Store
+## Implementation Rules:
+
+1. Don't refer to volatile concrete classes. Refer to abstract interfaces instead.
+    - See the [Abstract Factory Design Pattern](/design-patterns/abstract-factory)
+2. Avoid inheriting from volatile concrete classes.
+3. Don't override concrete functions.
+    - Create an abstract function with multiple implementations
+4. Don't mention the name of anything concrete or volatile. Mention the interface.
+
+## Example - Store class
 
     -   Bad
 

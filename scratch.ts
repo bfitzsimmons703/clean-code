@@ -1,30 +1,64 @@
-// Should only ever reach 1
-let instanceCount = 0;
+// Define what every robot has
+class Robot {
+	head!: string;
+	torso!: string;
+	legs!: string;
+	arms!: string;
+}
 
-export class Singleton {
-	// the single instance
-	private static instance: Singleton | null = null;
+export interface RobotBuilder {
+	buildHead(): void;
+	buildTorso(): void;
+	buildLegs(): void;
+	buildArms(): void;
+	getRobot(): Robot;
+}
 
-	// private so nothing outside the class can instantiate it
-	private constructor() {
-		instanceCount++;
+// Concrete builder class
+class OldRobotBuilder implements RobotBuilder {
+	private robot: Robot = new Robot();
+
+	getRobot(): Robot {
+		return this.robot;
 	}
 
-	// "lazy instantiation". If the instance is never needed, it won't be created.
-	public static getInstance(): Singleton {
-		if (this.instance === null) {
-			this.instance = new Singleton();
-		}
+	buildHead(): void {
+		this.robot.head = 'Old Head';
+	}
 
-		return this.instance;
+	buildTorso(): void {
+		this.robot.torso = 'Old Torso';
+	}
+
+	buildLegs(): void {
+		this.robot.legs = 'Old Legs';
+	}
+
+	buildArms(): void {
+		this.robot.arms = 'Old Arms';
 	}
 }
 
-const instance1 = Singleton.getInstance();
-console.log(instanceCount); // 1, since this is the first (and only) instance
+class RobotDirector {
+	private builder: RobotBuilder;
 
-const instance2 = Singleton.getInstance();
-console.log(instanceCount); // still 1, since we already instantiated the class
+	constructor(builder: RobotBuilder) {
+		this.builder = builder;
+	}
 
-const instance3 = Singleton.getInstance();
-console.log(instanceCount); // still 1 again
+	getRobot(): Robot {
+		return this.builder.getRobot();
+	}
+
+	public makeRobot() {
+		this.builder.buildHead();
+		this.builder.buildTorso();
+		this.builder.buildLegs();
+		this.builder.buildArms();
+	}
+}
+
+const oldRobotBuilder = new OldRobotBuilder();
+const director = new RobotDirector(oldRobotBuilder);
+director.makeRobot();
+console.log(director.getRobot());

@@ -1,0 +1,204 @@
+# Builder
+
+-   Pattern used to create objects made from several optional "parts".
+-   You extract the object construction code out of its own class and move it to separate objects called **builders**.
+    -   You specify a series of (optional) steps to call. IE `setStairs()`, `setWalls()`, etc.
+-   UML Diagram:
+    -   ![Builder Design Pattern UML](/builder-uml.png)
+
+## When to use
+
+    - When you have several optional fields for a class which can create different combinations in different instances.
+    - When you want your code to be able to create different representations of some product.
+
+## Director class
+
+-   A separate class the client can interact with, which calls the "builder" steps itself in a predefined order.
+-   The **director** defines the step order; the **builder** provides the implementations for those steps.
+-   Good for if you want to provide various predefined step templates across your app.
+
+## Example 1 - Simple User
+
+-   Bad
+
+    ```
+    class Address {
+        zip: number;
+        street: string;
+
+        constructor(zip: number, street: string) {
+            this.zip = zip;
+            this.street = street;
+        }
+    }
+
+    class User {
+        name: string;
+        age?: number;
+        eyeColor?: string;
+        address?: Address;
+
+        constructor(name: string, age?: number, eyeColor?: string, address?: Address) {
+            this.name = name;
+            this.age = age;
+            this.eyeColor = eyeColor;
+            this.address = address;
+        }
+    }
+
+    {
+        const user = new User('Jesse');
+        console.log(user); //{ name: "Jesse", age: undefined, eyeColor: undefined, address: undefined }
+    }
+
+    {
+        const user = new User('Jesse', undefined, undefined, new Address(1, 'Main'));
+        console.log(user); //{ name: "Jesse", age: undefined, eyeColor: undefined, address: { zip: 1, street: 'Main' } }
+    }
+    ```
+
+    -   Confusing to other developers what the "undefined" parameters are.
+
+-   Better
+
+    ```
+    class User {
+        name: string;
+        age?: number;
+        eyeColor?: string;
+        address?: Address;
+
+        constructor(name: string) {
+            this.name = name;
+        }
+    }
+
+    class UserBuilder {
+        user: User;
+
+        constructor(name: string) {
+            this.user = new User(name); //the only required parameter
+        }
+
+        setAge(age: number): UserBuilder {
+            this.user.age = age;
+            return this;
+        }
+
+        setEyeColor(eyeColor: string): UserBuilder {
+            this.user.eyeColor = eyeColor;
+            return this;
+        }
+
+        setAddress(address: Address): UserBuilder {
+            this.user.address = address;
+            return this;
+        }
+
+        build(): User {
+            return this.user;
+        }
+    }
+
+    const user1 = new UserBuilder('Jesse').build();
+    const user2 = new UserBuilder('Bob').setAge(12).build();
+    const user3 = new UserBuilder('Bob').setAddress(new Address(1, 'Main')).build();
+
+    console.log(user1);
+    console.log(user2);
+    console.log(user3);
+    ```
+
+-   Even Better, For TypeScript
+
+    ```
+    class User {
+        name: string;
+        age?: number;
+        eyeColor?: string;
+        address?: Address;
+
+        constructor(name: string, options: { age?: number; eyeColor?: string; address?: Address } = {}) {
+            const { age, eyeColor, address } = options;
+
+            this.name = name;
+            this.age = age;
+            this.eyeColor = eyeColor;
+            this.address = address;
+        }
+    }
+
+    const user1 = new User('Bob', { age: 10 });
+    console.log(user1);
+    const user2 = new User('Bob', { address: new Address(1, 'Main') });
+    console.log(user2);
+    ```
+
+## Example 2 - Robot Builder with Director
+
+```
+// Define what every robot has
+class Robot {
+	head!: string;
+	torso!: string;
+	legs!: string;
+	arms!: string;
+}
+
+interface RobotBuilder {
+	buildHead(): void;
+	buildTorso(): void;
+	buildLegs(): void;
+	buildArms(): void;
+	getRobot(): Robot;
+}
+
+// Concrete builder class
+class OldRobotBuilder implements RobotBuilder {
+	private robot: Robot = new Robot();
+
+	getRobot(): Robot {
+		return this.robot;
+	}
+
+	buildHead(): void {
+		this.robot.head = 'Old Head';
+	}
+
+	buildTorso(): void {
+		this.robot.torso = 'Old Torso';
+	}
+
+	buildLegs(): void {
+		this.robot.legs = 'Old Legs';
+	}
+
+	buildArms(): void {
+		this.robot.arms = 'Old Arms';
+	}
+}
+
+class RobotDirector {
+	private builder: RobotBuilder;
+
+	constructor(builder: RobotBuilder) {
+		this.builder = builder;
+	}
+
+	getRobot(): Robot {
+		return this.builder.getRobot();
+	}
+
+	public makeRobot() {
+		this.builder.buildHead();
+		this.builder.buildTorso();
+		this.builder.buildLegs();
+		this.builder.buildArms();
+	}
+}
+
+const oldRobotBuilder = new OldRobotBuilder();
+const director = new RobotDirector(oldRobotBuilder);
+director.makeRobot();
+console.log(director.getRobot());
+```
