@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import path from 'path';
 import fs, { readFileSync } from 'fs';
+import { upperCaseWord } from '../utils/upperCaseWord';
 
 interface TutorialLink {
 	href: string;
@@ -11,8 +12,6 @@ interface PageProps {
 	tutorialGroups: [string, TutorialLink[]][];
 	sources: TutorialLink[];
 }
-
-const upperCaseWord = (word: string): string => word[0].toUpperCase() + word.slice(1);
 
 export const getStaticProps = async () => {
 	const dir = path.join(process.cwd(), 'pages');
