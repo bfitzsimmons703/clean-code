@@ -43,13 +43,8 @@ export const getStaticProps = async () => {
 			const fileLines = fileContents.split('\n');
 			const title = fileLines[0].replace('#', ''); //the first line of every MDX file is the title, marked by a `#`
 
-			let group;
 			const hrefParts = href.split('/');
-			if (hrefParts.length > 1) {
-				group = hrefParts[0].split('-').map(upperCaseWord).join(' ');
-			} else {
-				group = 'Clean Code';
-			}
+			const group = hrefParts[0].split('-').map(upperCaseWord).join(' ');
 
 			const tutorials = tutorialGroups.get(group) || [];
 			tutorials.push({ href, title });
