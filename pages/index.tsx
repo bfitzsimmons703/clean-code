@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import path from 'path';
-import fs, { readFileSync } from 'fs';
-import { upperCaseWord } from '../utils/upperCaseWord';
+import { DirectoryParser } from '../lib/DirectoryParser';
+import { FileParser } from '../lib/FileParser';
 
 interface TutorialLink {
 	href: string;
@@ -9,92 +9,64 @@ interface TutorialLink {
 }
 
 interface PageProps {
-	tutorialGroups: [string, TutorialLink[]][];
-	sources: TutorialLink[];
+	tutorialLinks: TutorialLink[];
+	sources: { href: string; title: string }[];
 }
 
+const TUTORIAL_FILE_EXTENSION = '.mdx';
+
 export const getStaticProps = async () => {
-	const dir = path.join(process.cwd(), 'pages');
+	const tutorialsBaseDirectory = path.join(process.cwd(), 'pages/');
+	const dirParser = new DirectoryParser(tutorialsBaseDirectory);
+	const tutorialFilepaths = dirParser.getDirectoryFilepaths(tutorialsBaseDirectory).filter((file) => file.endsWith(TUTORIAL_FILE_EXTENSION));
 
-	const getFilesRecursively = (directory: string): string[] => {
-		const files: string[] = [];
+	const tutorialLinks: TutorialLink[] = tutorialFilepaths.map((tutorialRelativePath) => {
+		const tutorialFile = new FileParser(tutorialsBaseDirectory, tutorialRelativePath);
+		const tutorialFileLines = tutorialFile.getFileLines();
 
-		const filesInDirectory = fs.readdirSync(directory);
-		for (const file of filesInDirectory) {
-			const absolute = path.join(directory, file);
-			if (fs.statSync(absolute).isDirectory()) {
-				files.push(...getFilesRecursively(absolute));
-			} else {
-				files.push(absolute.replace(dir, ''));
-			}
-		}
+		const title = tutorialFileLines[0].replace('#', '').trim(); //the first line of every MDX file is the title, marked by a `#`
+		const href = tutorialRelativePath.replace(TUTORIAL_FILE_EXTENSION, ''); //In next.js, links mirror the folder structure
 
-		return files;
-	};
-
-	const tutorialGroups = new Map<string, TutorialLink[]>();
-	getFilesRecursively(dir)
-		.filter((file) => file.endsWith('.mdx'))
-		.forEach((file) => {
-			const href = file.split('.')[0].slice(1); //remove extension and starting slash
-			const filePath = path.join(dir, file);
-			const fileContents = readFileSync(filePath, 'utf8');
-			const fileLines = fileContents.split('\n');
-			const title = fileLines[0].replace('#', ''); //the first line of every MDX file is the title, marked by a `#`
-
-			const hrefParts = href.split('/');
-			const group = hrefParts[0].split('-').map(upperCaseWord).join(' ');
-
-			const tutorials = tutorialGroups.get(group) || [];
-			tutorials.push({ href, title });
-
-			tutorialGroups.set(group, tutorials);
-		});
-
-	const sources: TutorialLink[] = [
-		{
-			href: 'https://a.co/d/bMGqyFY',
-			title: 'Clean Code by Robert C. Martin',
-		},
-		{
-			href: 'https://a.co/d/5kQ1CV0',
-			title: 'Clean Architecture by Robert C. Martin',
-		},
-		{
-			href: 'https://refactoring.guru/',
-			title: 'Refactoring.guru',
-		},
-		{
-			href: 'https://www.youtube.com/playlist?list=PLF206E906175C7E07',
-			title: 'Design Patterns Video Tutorial by Derek Banas',
-		},
-	];
+		return { href, title };
+	});
 
 	const props: PageProps = {
-		//Next.js can't serialize Maps, so converting to an array
-		tutorialGroups: Array.from(tutorialGroups),
-		sources,
+		tutorialLinks,
+		sources: [
+			{
+				href: 'https://a.co/d/bMGqyFY',
+				title: 'Clean Code by Robert C. Martin',
+			},
+			{
+				href: 'https://a.co/d/5kQ1CV0',
+				title: 'Clean Architecture by Robert C. Martin',
+			},
+			{
+				href: 'https://refactoring.guru/',
+				title: 'Refactoring.guru',
+			},
+			{
+				href: 'https://www.youtube.com/playlist?list=PLF206E906175C7E07',
+				title: 'Design Patterns Video Tutorial by Derek Banas',
+			},
+		],
 	};
+
 	return { props };
 };
 
-const Home = ({ tutorialGroups, sources }: PageProps) => {
+const Home = ({ tutorialLinks, sources }: PageProps) => {
 	return (
 		<div>
-			{tutorialGroups.map(([groupName, tutorialLinks]) => (
-				<div key={groupName}>
-					<h4>{groupName}</h4>
-					<ul>
-						{tutorialLinks.map((link) => (
-							<li key={link.href}>
-								<Link href={`/${link.href}`}>
-									<a>{link.title}</a>
-								</Link>
-							</li>
-						))}
-					</ul>
-				</div>
-			))}
+			<ul>
+				{tutorialLinks.map((link) => (
+					<li key={link.href}>
+						<Link href={`/${link.href}`}>
+							<a>{link.title}</a>
+						</Link>
+					</li>
+				))}
+			</ul>
 
 			<hr />
 			<p>Sources:</p>
