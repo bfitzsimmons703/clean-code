@@ -2,6 +2,8 @@ import Link from 'next/link';
 import path from 'path';
 import { DirectoryParser } from '../lib/DirectoryParser';
 import { FileParser } from '../lib/FileParser';
+import { FileParserContentType, FileParserFactory } from '../lib/FileParserFactory';
+import { UTF8FileParser } from '../lib/UTF8FileParser';
 import { upperCaseWord } from '../utils/upperCaseWord';
 
 interface TutorialLink {
@@ -25,14 +27,19 @@ export const getStaticProps = async () => {
 
 	const tutorialGroups = new Map<string, TutorialLink[]>();
 	for (const tutorialRelativePath of tutorialFilepaths) {
-		const tutorialFile = new FileParser(tutorialsBaseDirectory, tutorialRelativePath);
-		const tutorialFileLines = tutorialFile.getFileLines();
+		const tutorialFileParser: FileParser = FileParserFactory.getFileParser(
+			FileParserContentType.UTF8,
+			tutorialsBaseDirectory,
+			tutorialRelativePath
+		);
+
+		const tutorialFileLines = tutorialFileParser.getFileLines();
 
 		const title = tutorialFileLines[0].replace('#', '').trim(); //the first line of every MDX file is the title, marked by a `#`
-		const href = tutorialRelativePath.replace(TUTORIAL_FILE_EXTENSION, ''); //In next.js, links mirror the folder structure
+		const href = tutorialRelativePath.replace(TUTORIAL_FILE_EXTENSION, ''); //In next.js, links mirror the folder structure under `pages/`
 
 		const hrefParts = href.split('/');
-		const group = hrefParts[0].split('-').map(upperCaseWord).join(' ');
+		const group = hrefParts[0].split('-').map(upperCaseWord).join(' '); //just setting the uppermost parent directory as the "group" for now
 
 		const tutorials = tutorialGroups.get(group) || [];
 		tutorials.push({ href, title });

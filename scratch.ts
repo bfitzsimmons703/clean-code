@@ -1,80 +1,70 @@
-export interface IPrototype {
-	clone(): this; //up to you whether it's a deep or shallow copy
+export enum QuestionType {
+	Boolean = 'boolean',
+	MultipleChoice = 'multiplechoice',
+	TextAnswer = 'textanswer',
 }
 
-class Animal implements IPrototype {
-	public name: string; //name
-	public address: Address; //object
-	public owner?: AnimalOwner; //circular reference
+abstract class Question {
+	type!: QuestionType;
+	description!: string;
+	abstract print(): void;
+}
 
-	constructor(name: string, address: Address) {
-		this.name = name;
-		this.address = address;
-	}
-
-	clone(): this {
-		const clone = Object.create(this);
-
-		clone.address = Object.create(this.address);
-
-		// Cloning an object that has a nested object with backreference
-		// requires special treatment. After the cloning is completed, the
-		// nested object should point to the cloned object, instead of the
-		// original object. Spread operator can be handy for this case.
-		if (this.owner) {
-			clone.owner = {
-				...this.owner,
-				animal: { ...this },
-			};
-		}
-
-		return clone;
+function printQuestions(questions: Question[]) {
+	for (const question of questions) {
+		question.print();
 	}
 }
 
-class Address {
-	zip: number;
-	street: string;
+class BooleanQuestion implements Question {
+	type = QuestionType.Boolean;
+	description: string;
 
-	constructor(zip: number, street: string) {
-		this.zip = zip;
-		this.street = street;
+	constructor(description: string) {
+		this.description = description;
+	}
+
+	print(): void {
+		console.log(this.description);
+		console.log(`1. True`);
+		console.log(`2. False`);
 	}
 }
 
-class AnimalOwner {
-	public animal;
+class MultipleChoiceQuestion implements Question {
+	type = QuestionType.MultipleChoice;
+	description: string;
+	options: string[];
 
-	constructor(animal: Animal) {
-		this.animal = animal;
+	constructor(description: string, options: string[]) {
+		this.description = description;
+		this.options = options;
+	}
+
+	print(): void {
+		console.log(this.description);
+		this.options.forEach((option, i) => console.log(`${i + 1}. ${option}`));
 	}
 }
 
-const animal1 = new Animal('Jesse', new Address(10, 'Main'));
-animal1.owner = new AnimalOwner(animal1);
+class TextAnswerQuestion implements Question {
+	type = QuestionType.TextAnswer;
+	description: string;
 
-const animal2 = animal1.clone();
+	constructor(description: string) {
+		this.description = description;
+	}
 
-if (animal1.name === animal2.name) {
-	console.log('Name sucessfully cloned');
-} else {
-	console.log('Name NOT cloned');
+	print(): void {
+		console.log(this.description);
+		console.log('Answer: ______________');
+	}
 }
 
-if (animal1.address === animal2.address) {
-	console.log('Address NOT cloned!');
-} else {
-	console.log('Address sucessfully cloned');
-}
+const questions: Question[] = [
+	new BooleanQuestion('Coding is fun.'),
+	new MultipleChoiceQuestion('How many years have you coded?', ['1 year', '2 years', '3 years']),
+	new TextAnswerQuestion('What was your favorite project?'),
+];
 
-if (animal1.owner === animal2.owner) {
-	console.log('Owner NOT cloned');
-} else {
-	console.log('Owner sucessfully cloned');
-}
-
-if (animal1.owner.animal === animal2.owner?.animal) {
-	console.log('Circular ref is linked to the original object = BAD');
-} else {
-	console.log('Circular ref is linked to the cloned object = GOOD');
-}
+printQuestions(questions);
