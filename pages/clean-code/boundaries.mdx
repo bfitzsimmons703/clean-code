@@ -1,0 +1,12 @@
+# Boundaries
+
+-   How to integrate third party code or libraries from other packages?
+-   Separate the third party code as much as possible - depend on something _you_ control, not the third party.
+
+## Wrapper classes
+
+-   Try wrapping third party code in classes you control that expose exactly the functionality you want.
+
+## Learn Third Party APIs through tests
+
+-   Write a test for how you think it should work in your application, _then_ start to debug if the tests fail.
