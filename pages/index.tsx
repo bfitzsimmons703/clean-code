@@ -2,6 +2,7 @@ import Link from 'next/link';
 import path from 'path';
 import { DirectoryParser } from '../lib/DirectoryParser';
 import { FileParser } from '../lib/FileParser';
+import { upperCaseWord } from '../utils/upperCaseWord';
 
 interface TutorialLink {
 	href: string;
@@ -9,7 +10,7 @@ interface TutorialLink {
 }
 
 interface PageProps {
-	tutorialLinks: TutorialLink[];
+	tutorialGroups: [string, TutorialLink[]][];
 	sources: { href: string; title: string }[];
 }
 
@@ -20,18 +21,26 @@ export const getStaticProps = async () => {
 	const dirParser = new DirectoryParser(tutorialsBaseDirectory);
 	const tutorialFilepaths = dirParser.getDirectoryFilepaths(tutorialsBaseDirectory).filter((file) => file.endsWith(TUTORIAL_FILE_EXTENSION));
 
-	const tutorialLinks: TutorialLink[] = tutorialFilepaths.map((tutorialRelativePath) => {
+	const tutorialGroups = new Map<string, TutorialLink[]>();
+	for (const tutorialRelativePath of tutorialFilepaths) {
 		const tutorialFile = new FileParser(tutorialsBaseDirectory, tutorialRelativePath);
 		const tutorialFileLines = tutorialFile.getFileLines();
 
 		const title = tutorialFileLines[0].replace('#', '').trim(); //the first line of every MDX file is the title, marked by a `#`
 		const href = tutorialRelativePath.replace(TUTORIAL_FILE_EXTENSION, ''); //In next.js, links mirror the folder structure
 
-		return { href, title };
-	});
+		const hrefParts = href.split('/');
+		const group = hrefParts[0].split('-').map(upperCaseWord).join(' ');
+
+		const tutorials = tutorialGroups.get(group) || [];
+		tutorials.push({ href, title });
+
+		tutorialGroups.set(group, tutorials);
+	}
 
 	const props: PageProps = {
-		tutorialLinks,
+		//Next.js can't serialize Maps, so converting to an array
+		tutorialGroups: Array.from(tutorialGroups),
 		sources: [
 			{
 				href: 'https://a.co/d/bMGqyFY',
@@ -55,18 +64,23 @@ export const getStaticProps = async () => {
 	return { props };
 };
 
-const Home = ({ tutorialLinks, sources }: PageProps) => {
+const Home = ({ tutorialGroups, sources }: PageProps) => {
 	return (
 		<div>
-			<ul>
-				{tutorialLinks.map((link) => (
-					<li key={link.href}>
-						<Link href={`/${link.href}`}>
-							<a>{link.title}</a>
-						</Link>
-					</li>
-				))}
-			</ul>
+			{tutorialGroups.map(([groupName, tutorialLinks]) => (
+				<div key={groupName}>
+					<h4>{groupName}</h4>
+					<ul>
+						{tutorialLinks.map((link) => (
+							<li key={link.href}>
+								<Link href={`/${link.href}`}>
+									<a>{link.title}</a>
+								</Link>
+							</li>
+						))}
+					</ul>
+				</div>
+			))}
 
 			<hr />
 			<p>Sources:</p>
