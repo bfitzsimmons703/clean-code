@@ -1,3 +1,18 @@
+# Prototype Design Pattern
+
+-   Creational design pattern that lets you copy objects without making your code dependent on the concrete classes.
+-   You just create an interface with a single `clone` method, which has a mostly similar implementation for all classes, regardless of properties.
+-   UML Diagram:
+    -   ![Prototype UML](/prototype-uml.png)
+
+## When to use
+
+-   For when you want to make different copies of a class at runtime without creating subclasses.
+-   For your code shouldn't depend on the concrete classes of objects that you need to copy. (IE having to worry about copying specific fields over)
+
+## Example
+
+```
 export interface IPrototype {
 	clone(): this; //up to you whether it's a deep or shallow copy
 }
@@ -78,3 +93,4 @@ if (animal1.owner.animal === animal2.owner?.animal) {
 } else {
 	console.log('Circular ref is linked to the cloned object = GOOD');
 }
+```
