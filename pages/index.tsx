@@ -19,7 +19,9 @@ const TUTORIAL_FILE_EXTENSION = '.mdx';
 export const getStaticProps = async () => {
 	const tutorialsBaseDirectory = path.join(process.cwd(), 'pages/');
 	const dirParser = new DirectoryParser(tutorialsBaseDirectory);
-	const tutorialFilepaths = dirParser.getDirectoryFilepaths(tutorialsBaseDirectory).filter((file) => file.endsWith(TUTORIAL_FILE_EXTENSION));
+	const tutorialFilepaths = dirParser
+		.getFlattenedDirectoryFilepaths(tutorialsBaseDirectory)
+		.filter((file) => file.endsWith(TUTORIAL_FILE_EXTENSION));
 
 	const tutorialGroups = new Map<string, TutorialLink[]>();
 	for (const tutorialRelativePath of tutorialFilepaths) {
