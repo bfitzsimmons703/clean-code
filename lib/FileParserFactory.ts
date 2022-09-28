@@ -1,3 +1,4 @@
+import { FileParser } from './FileParser';
 import { UTF8FileParser } from './UTF8FileParser';
 
 export enum FileParserContentType {
@@ -5,7 +6,7 @@ export enum FileParserContentType {
 }
 
 export class FileParserFactory {
-	static getFileParser(type: FileParserContentType, baseDir: string, relativePath: string) {
+	static getFileParser(type: FileParserContentType, baseDir: string, relativePath: string): FileParser {
 		switch (type) {
 			case FileParserContentType.UTF8:
 				return new UTF8FileParser(baseDir, relativePath);
