@@ -1,0 +1,29 @@
+# Unit Tests
+
+## 3 Laws of Test Driven Development (TDD)
+
+1. You may not write production code until you have written a failing unit test.
+2. You may not write more of a unit test than is sufficient to fail (including not compiling).
+3. You may not write more production code than is sufficient to pass the currently failing test.
+
+-   The tests and code are written together, in minutes long intervals.
+
+## Clean Tests
+
+-   Structure: _Given-When-Then_
+
+    1. Build (Given) - set up test data
+    2. Operate (When) - perform your operation on the test data
+    3. Check (Then) - assert that the output of you operation is what you expect
+
+-   Single concept per test
+
+## F.I.R.S.T Rules of Tests
+
+-   Tests should be:
+
+    1. **Fast** - tests should be fast
+    2. **Independent** - Tests should NOT depend on other tests. You should be able to run them Independently and in any order.
+    3. **Repeatable** - in any environment. Prod, Staging, or Dev.
+    4. **Self-Validating** - i.e. they should have a boolean output. Either they pass or fail.
+    5. **Timely** - tests should be written just before production code. Design the production code to pass the tests, not the other way around.
