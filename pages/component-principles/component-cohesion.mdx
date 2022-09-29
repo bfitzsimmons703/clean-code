@@ -1,0 +1,20 @@
+# Component Cohesion
+
+-   How to group classes?
+
+## Reuse/Release Equivalence Principle (REP)
+
+-   Classes that are grouped together should be _released_ together. IE they share the same version/release number.
+
+## Common Closure Principle (CCP)
+
+-   Group classes that change for the same reasons at the same time.
+-   Separate classes that change for different reasons or at different times.
+-   I.E. the [SRP Principle](/solid-principles/single-responsibility) for components!
+
+## Common Reuse Principle (CRP)
+
+-   Don't force users of a component to depend on things they don't need.
+-   AKA group classes that tend to be reused together (like `User` and `UserBuilder`)
+
+![Component Cohesion Diagram](/component-cohesion.jpg)
