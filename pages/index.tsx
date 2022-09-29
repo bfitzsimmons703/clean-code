@@ -2,7 +2,7 @@ import Link from 'next/link';
 import path from 'path';
 import { DirectoryParser } from '../lib/DirectoryParser';
 import { FileParser } from '../lib/FileParser';
-import { FileParserContentType, FileParserFactory } from '../lib/FileParserFactory';
+import { FileParserFactory } from '../lib/FileParserFactory';
 import { UTF8FileParser } from '../lib/UTF8FileParser';
 import { upperCaseWord } from '../utils/upperCaseWord';
 
@@ -27,11 +27,7 @@ export const getStaticProps = async () => {
 
 	const tutorialGroups = new Map<string, TutorialLink[]>();
 	for (const tutorialRelativePath of tutorialFilepaths) {
-		const tutorialFileParser: FileParser = FileParserFactory.getFileParser(
-			FileParserContentType.UTF8,
-			tutorialsBaseDirectory,
-			tutorialRelativePath
-		);
+		const tutorialFileParser: FileParser = FileParserFactory.getFileParserByEncoding('utf8', tutorialsBaseDirectory, tutorialRelativePath);
 
 		const tutorialFileLines = tutorialFileParser.getFileLines();
 
