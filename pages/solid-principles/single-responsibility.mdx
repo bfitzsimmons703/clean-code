@@ -41,3 +41,31 @@
             save(employee: EmployeeData);
         }
         ```
+
+-   Example: Rectangle class
+
+    -   Bad
+        ```
+        class Rectangle {
+            draw(): void;
+            calcArea(): number;
+        }
+        ```
+        -   Two responsibilities here: drawing and calculating area.
+        -   A change in how we draw rectangles is now caught up in how we calculate their area, forcing us to recompile/merge changes.
+    -   Better
+
+        ```
+        class GeometricRectangle {
+            calcArea(): number;
+        }
+
+        class RectangleGUI {
+            draw(): void;
+        }
+        ```
+
+## Avoid premature optimizations with SRP
+
+-   Don't try to predict things that _might_ change and separate classes accordingly.
+-   AKA avoid [needless complexity](/solid-principles/smells)
