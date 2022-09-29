@@ -56,6 +56,10 @@ export const getStaticProps = async () => {
 				title: 'Clean Architecture by Robert C. Martin',
 			},
 			{
+				href: 'https://www.amazon.com/Software-Development-Principles-Patterns-Practices/dp/0135974445/ref=tmm_hrd_swatch_0?_encoding=UTF8&qid=1664469726&sr=8-1',
+				title: 'Agile Software Development, Principles, Patterns, and Practices by Robert C. Martin',
+			},
+			{
 				href: 'https://refactoring.guru/',
 				title: 'Refactoring.guru',
 			},
