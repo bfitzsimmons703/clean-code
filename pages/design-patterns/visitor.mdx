@@ -1,4 +1,25 @@
-export interface ExportShapeVisitor {
+# Visitor
+
+-   Design pattern that lets you separate algorithms from the objects on which they operate.
+
+-   Instead of putting the algorithms directly inside those objects, you pass the objects to the algorithms within the `Visitor` as arguments.
+
+-   If the `Visitor` needs to execute different methods depending on the type of object passed in,
+    you can implement a method in those objects that accepts the `Visitor` and tells it what method to run.
+    AKA the _Double Dispatch_ method.
+
+-   UML Diagram
+    -   ![Visitor UML](/visitor-uml.png)
+
+## When to use
+
+-   When you want to perform some operation on a set of different objects/classes.
+
+## Example - Exporting a set of shapes as JSON and XML
+
+```
+//Declare the visitor interface with a "visit" method for each concrete element you want to operate on.
+interface ExportShapeVisitor {
 	visitCircle(c: Circle): void;
 	visitSquare(s: Square): void;
 	visitTriangle(t: Triangle): void;
@@ -72,3 +93,4 @@ class Triangle implements Shape, VisitedElement {
 		shape.accept(xmlExporter);
 	}
 }
+```

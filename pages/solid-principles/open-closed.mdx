@@ -1,126 +1,197 @@
 # Open-Closed Principle
 
--   Software should be able to change by extending it, not by modifying the existing code.
--   AKA you don't want make changes by modifying existing code, but by adding new code.
+_Software should be open to extension, closed to modification_.
+
+AKA software should be able to change by adding new code, not by modifying the existing code.
+
+Not possible in all situations, obviously. You can't (and shouldn't try to) predict future requirements.
+So instead of trying to abstract _everything_ up front, **wait for the change to happen** before trying to abstract it away.
+
+If you try to abstract up front, you'll get [needless complexity](/solid-principles/smells).
+
+## How to achieve the OCP? Abstraction
+
+-   Depend on abstract classes/interfaces. Not concrete classes.
+
+    -   See [Dependency Inversion](/solid-principles/dependency-inversion)
+
 -   Bad
 
     ```
-    enum QuestionType {
-        Boolean = 'boolean',
-        MultipleChoice = 'multiplechoice',
+    class Client {
+        server: ExpressServer;
+        constructor(server: ExpressServer) {
+            this.server = server;
+        }
     }
 
-    interface Question {
-        type: QuestionType;
-        description: string;
-        options?: string[];
+    class ExpressServer {}
+
+    const expressServer = new ExpressServer();
+    const client = new Client(expressServer);
+    ```
+
+    -   The client directly relies on the ExpressServer. What if we want to change to a Koa server?
+        We'd have to change the `Client` class as well to expect a `KoaServer` instead.
+
+-   Better, via the [Strategy](/design-patterns) pattern.
+
+    ```
+    class Client {
+        private server: Server;
+        constructor(server: Server) {
+            this.server = server;
+        }
+
+        run() {
+            this.server.listenAndServer();
+        }
     }
 
-    function printQuestions(questions: Question[]) {
-        for (const question of questions) {
-            console.log(question.description);
-            switch (question.type) {
-                case QuestionType.Boolean:
-                    console.log(`1. True`);
-                    console.log(`2. False`);
-                    break;
-                case QuestionType.MultipleChoice:
-                    question.options?.forEach((option, i) => console.log(`${i + 1}. ${option}`));
-                    break;
+    interface Server {
+        listenAndServer(): void;
+    }
+
+    class ExpressServer implements Server {
+        listenAndServer(): void {
+            console.log(`Express Server listening!`);
+        }
+    }
+
+    class KoaServer implements Server {
+        listenAndServer(): void {
+            console.log(`Koa Server listening!`);
+        }
+    }
+
+    const expressServer = new ExpressServer();
+    const client = new Client(expressServer);
+    client.run();
+    ```
+
+    -   Now we can switch out an Express or Koa server without touching the `Client`.
+
+## Example - Question printer
+
+    - Bad
+
+        ```
+        enum QuestionType {
+            Boolean = 'boolean',
+            MultipleChoice = 'multiplechoice',
+        }
+
+        interface Question {
+            type: QuestionType;
+            description: string;
+            options?: string[];
+        }
+
+        function printQuestions(questions: Question[]) {
+            for (const question of questions) {
+                console.log(question.description);
+                switch (question.type) {
+                    case QuestionType.Boolean:
+                        console.log(`1. True`);
+                        console.log(`2. False`);
+                        break;
+                    case QuestionType.MultipleChoice:
+                        question.options?.forEach((option, i) => console.log(`${i + 1}. ${option}`));
+                        break;
+                }
             }
         }
-    }
 
-    const questions: Question[] = [
-        {
-            type: QuestionType.Boolean,
-            description: 'Coding is fun',
-        },
-        {
-            type: QuestionType.MultipleChoice,
-            description: 'How many years have you coded?',
-            options: ['1 year', '2 years', '3 years'],
-        },
-    ];
+        const questions: Question[] = [
+            {
+                type: QuestionType.Boolean,
+                description: 'Coding is fun',
+            },
+            {
+                type: QuestionType.MultipleChoice,
+                description: 'How many years have you coded?',
+                options: ['1 year', '2 years', '3 years'],
+            },
+        ];
 
-    printQuestions(questions);
-    ```
+        printQuestions(questions);
+        ```
 
-    -   If we ever want to add a new question type, we need to update this switch statement.
+        -   If we ever want to add a new question type, we need to update this switch statement.
 
--   Better
+    -  Better
 
-    ```
-    enum QuestionType {
-        Boolean = 'boolean',
-        MultipleChoice = 'multiplechoice',
-        TextAnswer = 'textanswer',
-    }
-
-    abstract class Question {
-        type!: QuestionType;
-        description!: string;
-        abstract print(): void;
-    }
-
-    function printQuestions(questions: Question[]) {
-        for (const question of questions) {
-            question.print();
-        }
-    }
-
-    class BooleanQuestion implements Question {
-        type = QuestionType.Boolean;
-        description: string;
-
-        constructor(description: string) {
-            this.description = description;
+        ```
+        enum QuestionType {
+            Boolean = 'boolean',
+            MultipleChoice = 'multiplechoice',
+            TextAnswer = 'textanswer',
         }
 
-        print(): void {
-            console.log(this.description);
-            console.log(`1. True`);
-            console.log(`2. False`);
-        }
-    }
-
-    class MultipleChoiceQuestion implements Question {
-        type = QuestionType.MultipleChoice;
-        description: string;
-        options: string[];
-
-        constructor(description: string, options: string[]) {
-            this.description = description;
-            this.options = options;
+        abstract class Question {
+            type!: QuestionType;
+            description!: string;
+            abstract print(): void;
         }
 
-        print(): void {
-            console.log(this.description);
-            this.options.forEach((option, i) => console.log(`${i + 1}. ${option}`));
-        }
-    }
-
-    class TextAnswerQuestion implements Question {
-        type = QuestionType.TextAnswer;
-        description: string;
-
-        constructor(description: string) {
-            this.description = description;
+        function printQuestions(questions: Question[]) {
+            for (const question of questions) {
+                question.print();
+            }
         }
 
-        print(): void {
-            console.log(this.description);
-            console.log('Answer: ______________');
+        class BooleanQuestion implements Question {
+            type = QuestionType.Boolean;
+            description: string;
+
+            constructor(description: string) {
+                this.description = description;
+            }
+
+            print(): void {
+                console.log(this.description);
+                console.log(`1. True`);
+                console.log(`2. False`);
+            }
         }
-    }
 
-    const questions: Question[] = [
-        new BooleanQuestion('Coding is fun.'),
-        new MultipleChoiceQuestion('How many years have you coded?', ['1 year', '2 years', '3 years']),
-        new TextAnswerQuestion('What was your favorite project?'),
-    ];
+        class MultipleChoiceQuestion implements Question {
+            type = QuestionType.MultipleChoice;
+            description: string;
+            options: string[];
 
-    printQuestions(questions);
-    ```
+            constructor(description: string, options: string[]) {
+                this.description = description;
+                this.options = options;
+            }
 
-    -   We don't have to modify `printQuestions()` now!
+            print(): void {
+                console.log(this.description);
+                this.options.forEach((option, i) => console.log(`${i + 1}. ${option}`));
+            }
+        }
+
+        class TextAnswerQuestion implements Question {
+            type = QuestionType.TextAnswer;
+            description: string;
+
+            constructor(description: string) {
+                this.description = description;
+            }
+
+            print(): void {
+                console.log(this.description);
+                console.log('Answer: ______________');
+            }
+        }
+
+        const questions: Question[] = [
+            new BooleanQuestion('Coding is fun.'),
+            new MultipleChoiceQuestion('How many years have you coded?', ['1 year', '2 years', '3 years']),
+            new TextAnswerQuestion('What was your favorite project?'),
+        ];
+
+        printQuestions(questions);
+        ```
+
+        -   We don't have to modify `printQuestions()` now!
