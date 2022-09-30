@@ -1,70 +1,76 @@
-interface EmployeeDatabase {
-	paymentPosted(): boolean;
-	get(employeeId: number): Employee;
-	save(employee: Employee): void;
+export interface Button {
+	click(): void;
 }
 
-interface CheckWriter {
-	writeCheck(amount: number): void;
-	checkWasWritten(): boolean;
+interface TextBox {
+	input(): void;
 }
 
-class Employee {
-	calculatePayment(): number {
-		//...
+abstract class GUIFactory {
+	static getFactory(osType: string): GUIFactory {
+		switch (osType) {
+			case 'windows':
+				return new WindowsGUIFactory();
+			case 'mac':
+				return new MacGUIFactory();
+			default:
+				throw new Error('Unknown OS Type');
+		}
 	}
 
-	postPayment(payment: number): void {
-		//...
-	}
+	abstract createButton(): Button;
+	abstract createTextBox(): TextBox;
 }
 
-class Payroll {
-	private employeeDB: EmployeeDatabase;
-	private checkWriter: CheckWriter;
-
-	constructor(employeeDB: EmployeeDatabase, checkWriter: CheckWriter) {
-		this.employeeDB = employeeDB;
-		this.checkWriter = checkWriter;
-	}
-
-	payEmployee() {
-		const employee = this.employeeDB.get(5);
-		const payment = employee.calculatePayment();
-		this.checkWriter.writeCheck(payment);
-		employee.postPayment(payment);
-		this.employeeDB.save(employee);
+class WindowsButton implements Button {
+	click(): void {
+		console.log('Clicked Windows Button');
 	}
 }
 
-class MockEmployeeDB implements EmployeeDatabase {
-	paymentPosted(): boolean {
-		throw new Error('Method not implemented.');
-	}
-	get(employeeId: number): Employee {
-		throw new Error('Method not implemented.');
-	}
-	save(employee: Employee): void {
-		throw new Error('Method not implemented.');
+class WindowsTextBox implements TextBox {
+	input(): void {
+		console.log('Inputted Windows TextBox');
 	}
 }
 
-class MockCheckWriter implements CheckWriter {
-	writeCheck(amount: number): void {
-		throw new Error('Method not implemented.');
+class WindowsGUIFactory extends GUIFactory {
+	createButton(): Button {
+		const button = new WindowsButton();
+		return button;
 	}
-	checkWasWritten(): boolean {
-		throw new Error('Method not implemented.');
+	createTextBox(): TextBox {
+		const textBox = new WindowsTextBox();
+		return textBox;
 	}
 }
 
-test('Test Payroll writes check', () => {
-	const employeeDB = new MockEmployeeDB();
-	const checkWriter = new MockCheckWriter();
+class MacButton implements Button {
+	click(): void {
+		console.log('Clicked Mac Button');
+	}
+}
 
-	const payroll = new Payroll(employeeDB, checkWriter);
-	payroll.payEmployee();
+class MacTextBox implements TextBox {
+	input(): void {
+		console.log('Inputted Mac TextBox');
+	}
+}
 
-	expect(checkWriter.checkWasWritten());
-	expect(employeeDB.paymentPosted());
-});
+class MacGUIFactory extends GUIFactory {
+	createButton(): Button {
+		const button = new MacButton();
+		return button;
+	}
+	createTextBox(): TextBox {
+		const textBox = new MacTextBox();
+		return textBox;
+	}
+}
+
+const guiFactory = GUIFactory.getFactory('windows');
+const button = guiFactory.createButton();
+button.click();
+
+const textBox = guiFactory.createTextBox();
+textBox.input();
