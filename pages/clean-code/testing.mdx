@@ -1,0 +1,237 @@
+# Testing
+
+Testing impacts design. Testable code = Decoupled code = Clean code.
+
+## 3 Laws of Test Driven Development (TDD)
+
+1. You may not write production code until you have written a failing unit test.
+2. You may not write more of a unit test than is sufficient to fail (including not compiling).
+3. You may not write more production code than is sufficient to pass the currently failing test.
+
+The tests and code are written together, in minutes long intervals.
+
+By writing tests first, we write our code with the point of view of the caller, not the coder.
+This forces us to write a more user-friendly interface and code that is decoupled from its environment.
+
+## Clean Tests
+
+-   Structure: _Given-When-Then_
+
+    1. Build (Given) - set up test data
+    2. Operate (When) - perform your operation on the test data
+    3. Check (Then) - assert that the output of you operation is what you expect
+
+-   Single concept per test
+
+    -   Bad
+
+        ```
+        test(() => {
+            const game = new Game();
+            expect(game.status).toEqual(GameStatus.Ready);
+
+            game.launch();
+            expect(game.status).toEqual(GameStatus.Running);
+
+            const score = game.getScore();
+            expect(score).toEqual(0);
+
+            game.incrementScore();
+            expect(score).toEqual(1);
+
+            game.end();
+            expect(game.status).toEqual(GameStatus.Finished);
+        });
+        ```
+
+        -   Testing both the game lifecycle and the scoring mechanism here
+
+    -   Better
+
+        ```
+        test(() => {
+            const game = new Game();
+            expect(game.status).toEqual(GameStatus.Ready);
+
+            game.launch();
+            expect(game.status).toEqual(GameStatus.Running);
+
+            game.end();
+            expect(game.status).toEqual(GameStatus.Finished);
+        });
+
+        test(() => {
+            const game = new Game();
+            game.launch();
+
+            const score = game.getScore();
+            expect(score).toEqual(0);
+
+            game.incrementScore();
+            expect(score).toEqual(1);
+        });
+        ```
+
+## F.I.R.S.T Rules of Tests
+
+-   Tests should be:
+
+    1. **Fast** - tests should be fast
+    2. **Independent** - Tests should NOT depend on other tests. You should be able to run them Independently and in any order.
+    3. **Repeatable** - in any environment. Prod, Staging, or Dev.
+    4. **Self-Validating** - i.e. they should have a boolean output. Either they pass or fail.
+    5. **Timely** - tests should be written just before production code. Design the production code to pass the tests, not the other way around.
+
+## Test Isolation Example: Payroll class
+
+-   Bad
+
+    ```
+    class EmployeeDatabase {
+        paymentPosted(): boolean {
+            //...
+        }
+
+        get(employeeId: number): Employee {
+            //...
+        }
+
+        save(employee: Employee): {
+            //...
+        };
+    }
+
+    class CheckWriter {
+        writeCheck(amount: number): void {
+            //...
+        }
+
+        checkWasWritten(): boolean {
+            //...
+        }
+    }
+
+    class Employee {
+        calculatePayment(): number {
+            //...
+        }
+
+        postPayment(payment: number): void {
+            //...
+        }
+    }
+
+    class Payroll {
+        private employeeDB: EmployeeDatabase;
+        private checkWriter: CheckWriter;
+
+        constructor(employeeDB: EmployeeDatabase, checkWriter: CheckWriter) {
+            this.employeeDB = employeeDB;
+            this.checkWriter = checkWriter;
+        }
+
+        payEmployee() {
+            const employee = this.employeeDB.get(5);
+            const payment = employee.calculatePayment();
+            this.checkWriter.writeCheck(payment);
+            employee.postPayment(payment);
+            this.employeeDB.save(employee);
+        }
+    }
+
+    test('Test Payroll writes check', () => {
+        const employeeDB = new EmployeeDatabase();
+        const checkWriter = new CheckWriter();
+
+        const payroll = new Payroll(employeeDB, checkWriter);
+        payroll.payEmployee();
+
+        expect(checkWriter.checkWasWritten());
+        expect(employeeDB.paymentPosted());
+    });
+    ```
+
+    -   You need to have an actual DB and actual check writer set up to test this
+
+-   Better, with the [Mock Object](/design-patterns/mock-object) design pattern
+
+    ```
+    interface EmployeeDatabase {
+        paymentPosted(): boolean;
+        get(employeeId: number): Employee;
+        save(employee: Employee): void;
+    }
+
+    interface CheckWriter {
+        writeCheck(amount: number): void;
+        checkWasWritten(): boolean;
+    }
+
+    class Employee {
+        calculatePayment(): number {
+            //...
+        }
+
+        postPayment(payment: number): void {
+            //...
+        }
+    }
+
+    class Payroll {
+        private employeeDB: EmployeeDatabase;
+        private checkWriter: CheckWriter;
+
+        constructor(employeeDB: EmployeeDatabase, checkWriter: CheckWriter) {
+            this.employeeDB = employeeDB;
+            this.checkWriter = checkWriter;
+        }
+
+        payEmployee() {
+            const employee = this.employeeDB.get(5);
+            const payment = employee.calculatePayment();
+            this.checkWriter.writeCheck(payment);
+            employee.postPayment(payment);
+            this.employeeDB.save(employee);
+        }
+    }
+
+    class MockEmployeeDB implements EmployeeDatabase {
+        paymentPosted(): boolean {
+            throw new Error('Method not implemented.');
+        }
+        get(employeeId: number): Employee {
+            throw new Error('Method not implemented.');
+        }
+        save(employee: Employee): void {
+            throw new Error('Method not implemented.');
+        }
+    }
+
+    class MockCheckWriter implements CheckWriter {
+        writeCheck(amount: number): void {
+            throw new Error('Method not implemented.');
+        }
+        checkWasWritten(): boolean {
+            throw new Error('Method not implemented.');
+        }
+    }
+
+    test('Test Payroll writes check', () => {
+        const employeeDB = new MockEmployeeDB();
+        const checkWriter = new MockCheckWriter();
+
+        const payroll = new Payroll(employeeDB, checkWriter);
+        payroll.payEmployee();
+
+        expect(checkWriter.checkWasWritten());
+        expect(employeeDB.paymentPosted());
+    });
+    ```
+
+    -   Use interfaces that allow you to create mock objects.
+        We're testing that the Payroll object does its work, not the CheckWriter or EmployeeDatabase.
+    -   Also allows us to swap in different databases and check writers.
+
+## Unit Tests vs Acceptance Tests
+
+Unit tests test a small isolated part of your system. Acceptance tests test the whole thing.
