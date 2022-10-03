@@ -1,74 +1,21 @@
-export interface ExportShapeVisitor {
-	visitCircle(c: Circle): void;
-	visitSquare(s: Square): void;
-	visitTriangle(t: Triangle): void;
-}
-
-// Concretions
-class JSONExportShapeVisitor implements ExportShapeVisitor {
-	visitCircle(c: Circle): void {
-		console.log(`Exporting JSON circle`, c);
-	}
-	visitSquare(s: Square): void {
-		console.log(`Exporting JSON square`, s);
-	}
-	visitTriangle(t: Triangle): void {
-		console.log(`Exporting JSON triangle`, t);
+export class A {
+	getBool(): boolean {
+		return true;
 	}
 }
 
-class XMLExportShapeVisitor implements ExportShapeVisitor {
-	visitCircle(c: Circle): void {
-		console.log(`Exporting XML circle`, c);
-	}
-	visitSquare(s: Square): void {
-		console.log(`Exporting XML square`, s);
-	}
-	visitTriangle(t: Triangle): void {
-		console.log(`Exporting XML triangle`, t);
+class B extends A {
+	getBool(): boolean {
+		throw new Error('Not implemented');
 	}
 }
 
-// Double Dispatch method
-interface VisitedElement {
-	accept(v: ExportShapeVisitor): void;
+function f(arg: A) {
+	arg.getBool();
 }
 
-interface Shape {
-	name: string;
-}
+const a = new A();
+f(a); //okay
 
-class Circle implements Shape, VisitedElement {
-	name: string = 'Circle';
-
-	accept(v: ExportShapeVisitor): void {
-		v.visitCircle(this);
-	}
-}
-
-class Square implements Shape, VisitedElement {
-	name: string = 'Square';
-
-	accept(v: ExportShapeVisitor): void {
-		v.visitSquare(this);
-	}
-}
-
-class Triangle implements Shape, VisitedElement {
-	name: string = 'Triangle';
-
-	accept(v: ExportShapeVisitor): void {
-		v.visitTriangle(this);
-	}
-}
-
-{
-	const jsonExporter = new JSONExportShapeVisitor();
-	const xmlExporter = new XMLExportShapeVisitor();
-	const visitedShapes: VisitedElement[] = [new Circle(), new Square(), new Triangle()];
-
-	for (const shape of visitedShapes) {
-		shape.accept(jsonExporter);
-		shape.accept(xmlExporter);
-	}
-}
+const b = new B();
+f(b); //throws error!

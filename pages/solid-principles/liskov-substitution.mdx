@@ -1,7 +1,55 @@
 # Liskov Substitution Principle
 
+-   _Subtypes must be substitutable for their base types_.
 -   If "S" is a subtype of "T", then anywhere you use "T" you should be able to use "S"
     -   Example: If you have a superclass `Bird` and a subclass `Penguin`, you should be able to use `Penguin` anywhere you use `Bird`
+
+## What violations looks like
+
+```
+class A {
+	getBool(): boolean {
+		return true;
+	}
+}
+
+class B extends A {
+	getBool(): boolean {
+		throw new Error('Not implemented');
+	}
+}
+
+function f(arg: A) {
+	arg.getBool();
+}
+
+const a = new A();
+f(a); //okay
+
+const b = new B();
+f(b); //throws error!
+```
+
+-   Bad way of fixing would be to update `f()` to account for `B`'s behavior by checking the type at run time (_Run Time Type Information_).
+    But that Violates the [Open-Closed Principle](/solid-principles/open-closed).
+
+## Implications of LSP on inheritence and the `IS-A` relationship
+
+Don't think about the properties or specific methods a subtype might have in common with a base class, but the _behaviors_.
+
+For example, a Square _is a_ Rectangle, but when setting the width and height,
+the behaviors diverge because distinguishing between width and height doesn't make sense for Squares.
+
+**Therefore, the IS-A rule may be too broad. When deciding whether to inherit from a base class, instead of asking whether Duck is-a Bird,
+ask if Duck is _substituteable_ for Bird as defined by Bird's contract.**
+
+## Design by Contract
+
+-   The author of a class explicitly states a contract for that class, which tells the calling code what behaviors can be relied upon.
+-   So users of the base class must not be confused by output of any subclasses.
+
+## Example: Bird Classes
+
 -   Bad
 
     ```
