@@ -17,10 +17,29 @@ I.E. if you have a dependency graph, you should never be able to follow the edge
     -   If you want to build and test `Entities`, now you have to couple it with `Authorizer` and `Interactors`.
     -   Harder to release - you have to release those three as one (which may not really be possible).
 
-## How to fix Cyclical Dependecies
+### How to fix Cyclical Dependecies
 
 -   Apply the [Dependency Inversion Principle](/solid-principles/dependency-inversion).
     -   Abstract out an interface that both `Entities` and `Authorizer` can use.
         ![DIP Fix 1](/cyclical-dependency-dip-fix.jpeg)
 -   Create new component that both can depend on
     ![DIP Fix 2](/cyclical-dependency-new-component-fix.jpeg)
+
+## Stable Dependecies Principle (SDP)
+
+Components intended to be easy to change should not depend on components that are harder to change.
+I.E. "stable" code should not depend on "volatile" code.
+
+-   Stable Code = code that lots of other pieces depend on.
+
+## Stable Abstractions Principle (SAP)
+
+The "stability" of a component is directly related to how "abstract" it is.
+
+-   Interfaces and abstract classes with purely abstract methods are the most stable, since they can be extended easily.
+-   Concrete classes are the most volatile.
+
+## SDP + SAP = Dependency Inversion Principle
+
+**Dependecies should run in the direction of stability (i.e. lower level classes should be more stable).
+Stable classes are more abstract. Therefore, dependencies should run in the direction of abstractions.**
