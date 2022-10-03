@@ -1,0 +1,26 @@
+# Component Coupling
+
+How should classes relate to each other?
+
+## Acyclic Dependecies Principle
+
+There should be no dependency cycles among components.
+I.E. if you have a dependency graph, you should never be able to follow the edges back to your original component.
+
+-   Good
+    ![Acyclic DAG](/acyclic-dag.jpeg)
+    -   A change to any "higher-level" component should not affect those components it depends upon.
+    -   I.E. Changing `Main` should affect nothing else.
+    -   Also easy to release - you release `Entities`, then `Database` and `Interactors`, etc.
+-   Bad
+    ![Cyclic DAG](/cyclic-dag.jpg)
+    -   If you want to build and test `Entities`, now you have to couple it with `Authorizer` and `Interactors`.
+    -   Harder to release - you have to release those three as one (which may not really be possible).
+
+## How to fix Cyclical Dependecies
+
+-   Apply the [Dependency Inversion Principle](/solid-principles/dependency-inversion).
+    -   Abstract out an interface that both `Entities` and `Authorizer` can use.
+        ![DIP Fix 1](/cyclical-dependency-dip-fix.jpeg)
+-   Create new component that both can depend on
+    ![DIP Fix 2](/cyclical-dependency-new-component-fix.jpeg)
