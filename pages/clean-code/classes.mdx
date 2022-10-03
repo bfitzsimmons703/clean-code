@@ -1,0 +1,90 @@
+# Classes
+
+## Overall Organization
+
+Should read like a newspaper - important information up top, details below.
+
+```
+class Example {
+	// public static constants
+	public static A = 1;
+	public static B = 2;
+
+	// private static variables
+	private static C = 3;
+	private static D = 4;
+
+	// private instance variables
+	private name!: string;
+	private age!: number;
+
+	// public instance variables (really shouldn't have these though)
+	public weight!: number;
+	public height!: number;
+
+	// constructor
+	constructor(...args: any[]) {}
+
+	// public methods + private methods they use
+	public run1(): void {
+		this.util1();
+	}
+	private util1(): void {}
+
+	public run2(): void {
+		this.util2();
+	}
+	private util2(): void {}
+}
+```
+
+## Classes should be small!
+
+-   Follow the [Single Responsibility Principle](/solid-principles/single-responsibility)
+-   Minimize the number of instance variables.
+-   Example: SQL Generator Class
+
+    -   Bad
+        ```
+        class Sql {
+            public select() {}
+            public selectAll() {}
+            public insert() {}
+            public preparedInsert() {}
+            public findByKey() {}
+            public create() {}
+        }
+        ```
+        -   Not only does this have too many responsibilities (it tries to do _all_ SQL generation),
+            but it violates the [Open-Closed Principle](/solid-principles/open-closed) - if you want to add a new "update" SQL statement, you'd have to modify the existing class.
+    -   Better
+
+        ```
+        abstract class Sql {
+            abstract generate(): string;
+        }
+
+        class SelectSql extends Sql {
+            generate(): string {
+                return 'select id from ...';
+            }
+        }
+        class SelectAllSql extends Sql {
+            generate(): string {
+                return 'select * from ...';
+            }
+        }
+        class InsertSql extends Sql {
+            generate(): string {
+                return 'insert into ...';
+            }
+        }
+        class CreateSql extends Sql {
+            generate(): string {
+                return 'create table ...';
+            }
+        }
+        ```
+
+        -   Each class deals with only a certain type of SQL statement.
+        -   In line with the [Open-Closed Principle](/solid-principles/open-closed) - if you want a new SQL statement, you just need a new class!

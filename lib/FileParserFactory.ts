@@ -8,7 +8,7 @@ export class FileParserFactory {
 			case 'utf8':
 				return new UTF8FileParser(baseDir, relativePath);
 			default:
-				throw new Error('Unknown FileParser content type: ' + encoding);
+				throw new Error('Unknown FileParser encoding: ' + encoding);
 		}
 	}
 }

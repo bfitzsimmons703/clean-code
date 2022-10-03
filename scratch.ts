@@ -1,21 +1,24 @@
-export class A {
-	getBool(): boolean {
-		return true;
+export abstract class Sql {
+	abstract generate(): string;
+}
+
+class SelectSql extends Sql {
+	generate(): string {
+		return 'select id from ...';
 	}
 }
-
-class B extends A {
-	getBool(): boolean {
-		throw new Error('Not implemented');
+class SelectAllSql extends Sql {
+	generate(): string {
+		return 'select * from ...';
 	}
 }
-
-function f(arg: A) {
-	arg.getBool();
+class InsertSql extends Sql {
+	generate(): string {
+		return 'insert into ...';
+	}
 }
-
-const a = new A();
-f(a); //okay
-
-const b = new B();
-f(b); //throws error!
+class CreateSql extends Sql {
+	generate(): string {
+		return 'create table ...';
+	}
+}
