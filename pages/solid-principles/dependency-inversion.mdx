@@ -1,7 +1,6 @@
 # Dependency Inversion Principle
 
 -   The most flexible system is one that depends on abstractions, not concretions.
-    -   So you should only import interfaces or abstract classes, not concrete classes.
 -   Those abstractions, in turn, dictate how to implement the low level code. I.E. through interfaces.
 
 ## Implementation Rules:
@@ -12,6 +11,19 @@
 3. Don't override concrete functions.
     - Create an abstract function with multiple implementations
 4. Don't mention the name of anything concrete or volatile. Mention the interface.
+
+## Layering
+
+-   Applications should have clearly defined architectural layers (ie high level policy, mid level implementations, low level utilities).
+-   These layers should only interact through interfaces/abstract classes.
+    ![DIP Layers](/dip-layers.jpg)
+
+### Hollywood Principle
+
+-   _Don't call us. We'll call you_.
+-   Notice how, in the diagram above, the _calling_ layer owns the abstraction that the lower layer implements.
+-   **The lower level module provides the implementation for interfaces that are declared within, and called by, the upper level modules.**
+    -   This is good, because high level policies should dictate the structure of the application, not low level details!
 
 ## Example - Store class
 
