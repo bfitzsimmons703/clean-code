@@ -1,24 +1,20 @@
-export abstract class Sql {
-	abstract generate(): string;
+export interface Timer {
+	setTimer(): void;
 }
 
-class SelectSql extends Sql {
-	generate(): string {
-		return 'select id from ...';
-	}
+export interface Door {
+	lock(): void;
+	unlock(): void;
 }
-class SelectAllSql extends Sql {
-	generate(): string {
-		return 'select * from ...';
+
+class TimedDoor implements Timer, Door {
+	setTimer(): void {
+		throw new Error('Method not implemented.');
 	}
-}
-class InsertSql extends Sql {
-	generate(): string {
-		return 'insert into ...';
+	lock(): void {
+		throw new Error('Method not implemented.');
 	}
-}
-class CreateSql extends Sql {
-	generate(): string {
-		return 'create table ...';
+	unlock(): void {
+		throw new Error('Method not implemented.');
 	}
 }
