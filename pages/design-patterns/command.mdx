@@ -1,0 +1,220 @@
+# Command
+
+-   Turns a request into a stand-alone object
+    and encapsulates all the required information needed to execute that request.
+-   Allows you to maintain a stack of commands to execute (and undo) whenever you want.
+-   UML Diagram:
+    ![Command UML](/command-uml.png)
+-   Three parts:
+    -   Invoker - initiates the request, so needs a reference to the Command
+    -   Receiver - resposible for the business logic within the request
+    -   Command - encapsulates all the necessary info for the invoker to invoke the receiver's business logic
+
+## When to use
+
+-   For event driven architectures.
+    -   Ex: On clicking a button, call `do()` on whatever `Command` object is bound to the button.
+-   For when you want to queue operations and execute them asynchronously.
+-   When you need a way to undo commands.
+
+## Example 1: TV Device
+
+```
+// Commands
+interface Command {
+	do(): void;
+	undo(): void;
+}
+
+class TurnTvOnCommand implements Command {
+	private device: Device;
+
+	constructor(device: Device) {
+		this.device = device;
+	}
+
+	do(): void {
+		this.device.on();
+	}
+
+	undo(): void {
+		this.device.off();
+	}
+}
+
+class TurnTvOffCommand implements Command {
+	private device: Device;
+
+	constructor(device: Device) {
+		this.device = device;
+	}
+
+	do(): void {
+		this.device.off();
+	}
+
+	undo(): void {
+		this.device.off();
+	}
+}
+
+class TurnTVolumeUpCommand implements Command {
+	private device: Device;
+
+	constructor(device: Device) {
+		this.device = device;
+	}
+
+	do(): void {
+		this.device.volumeUp();
+	}
+
+	undo(): void {
+		this.device.volumeDown();
+	}
+}
+
+// Receivers
+interface Device {
+	on(): void;
+	off(): void;
+	volumeUp(): void;
+	volumeDown(): void;
+}
+
+class TV implements Device {
+	private volume: number = 0;
+
+	private printVolume(): void {
+		console.log(`Volume: ${this.volume}`);
+	}
+
+	on(): void {
+		console.log(`TV on`);
+	}
+	off(): void {
+		console.log(`TV off`);
+	}
+	volumeUp(): void {
+		this.volume++;
+		this.printVolume();
+	}
+	volumeDown(): void {
+		this.volume--;
+		this.printVolume();
+	}
+}
+
+// Invoker
+interface Invoker {
+	press(): void;
+	pressUndo(): void;
+}
+
+class Button implements Invoker {
+	private command: Command;
+	constructor(command: Command) {
+		this.command = command;
+	}
+
+	press(): void {
+		this.command.do();
+	}
+
+	pressUndo(): void {
+		this.command.undo();
+	}
+}
+
+{
+	const device: Device = new TV();
+	const onCommand: Command = new TurnTvOnCommand(device);
+	let invoker: Invoker = new Button(onCommand);
+	invoker.press(); //tv on
+
+	const offCommand = new TurnTvOffCommand(device);
+	invoker = new Button(offCommand);
+	invoker.press(); //tv off
+
+	const volumeUpCommand = new TurnTVolumeUpCommand(device);
+	invoker = new Button(volumeUpCommand);
+	invoker.press(); //1
+	invoker.press(); //2
+	invoker.press(); //3
+
+	invoker.pressUndo(); //2
+}
+```
+
+## Example 2: Rooms
+
+```
+// Command
+interface Command {
+	do(): void;
+	undo(): void;
+}
+
+class SwitchLightsCommand implements Command {
+	private light: Light;
+
+	constructor(light: Light) {
+		this.light = light;
+	}
+
+	do(): void {
+		this.light.switchLight();
+	}
+
+	undo(): void {
+		this.light.switchLight();
+	}
+}
+
+// Receivers
+interface Light {
+	isOn: boolean;
+	switchLight(): void;
+}
+
+class FloorLamp implements Light {
+	isOn: boolean = false;
+	switchLight() {
+		this.isOn = !this.isOn;
+		console.log(`Floor Lamp is ${this.isOn ? 'on' : 'off'}`);
+	}
+}
+
+class OverheadLight implements Light {
+	isOn: boolean = false;
+	switchLight() {
+		this.isOn = !this.isOn;
+		console.log(`Overhead Light is ${this.isOn ? 'on' : 'off'}`);
+	}
+}
+
+// Invoker
+abstract class Room {
+	private command!: Command;
+
+	protected setCommand(command: Command) {
+		this.command = command;
+	}
+
+	public executeCommand() {
+		this.command.do();
+	}
+}
+
+class LivingRoom extends Room {
+	constructor() {
+		super();
+		this.setCommand(new SwitchLightsCommand(new FloorLamp()));
+	}
+}
+
+{
+	const livingRoom = new LivingRoom();
+	livingRoom.executeCommand();
+}
+```
