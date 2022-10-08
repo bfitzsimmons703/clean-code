@@ -1,5 +1,21 @@
+# Template Method
+
+-   Design pattern to separate generic algorithms from specific implementation details.
+-   You capture all common, generic code among a group of algorithms in a base class, while delegating the details to subclasses via abstract methods.
+-   This is the inheritance equivalent of the [Strategy](/design-patterns/strategy) pattern.
+    -   Downside is that you tightly couple the implementation details to the base class.
+-   UML Diagram
+    ![Template Method UML](/template-method-uml.png)
+
+## When to use
+
+-   When you have a group of algorithms with some common code, but details you want to separate out into subclasses.
+
+## Example 1: House Builder
+
+```
 // The "Template" abstract class
-export abstract class HouseBuilder {
+abstract class HouseBuilder {
 	// Common methods
 	public buildHouse() {
 		this.buildFoundation();
@@ -41,3 +57,4 @@ class GlassHouseBuilder extends HouseBuilder {
 		console.log('Building a glass roof');
 	}
 }
+```
