@@ -67,6 +67,10 @@ export const getStaticProps = async () => {
 				href: 'https://www.youtube.com/playlist?list=PLF206E906175C7E07',
 				title: 'Design Patterns Video Tutorial by Derek Banas',
 			},
+			{
+				href: 'https://www.digitalocean.com/community/tutorials/gangs-of-four-gof-design-patterns',
+				title: 'Gang of Four Design Patterns by DigitalOcean',
+			},
 		],
 	};
 
