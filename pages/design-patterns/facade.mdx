@@ -1,0 +1,24 @@
+# Facade
+
+-   Provides a simple interface for a group of objects that have complex interfaces themselves.
+-   Think of a wrapper class for something complex - you hide the complexity behind a facade of simplicity.
+
+## Example: Database Facade
+
+```
+class ProductsDB {
+	connection!: Connection;
+
+	init() {}
+
+	insertProducts() {
+		this.connection.query('INSERT INTO ...');
+	}
+
+	deleteProduct(id: number) {
+		this.connection.query(`DELETE FROM ... WHERE id = ${id}`);
+	}
+}
+```
+
+    - Hides the complexity of SQL inserts behind a ProductsDB class.
