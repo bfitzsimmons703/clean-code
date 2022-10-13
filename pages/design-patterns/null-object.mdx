@@ -1,0 +1,49 @@
+# Null Object
+
+-   Lets you avoid explicit `null` checks, which are error prone and easy to forget.
+-   The Null Object implements all the methods of the regular object, but with "nothing" or "falsey" values.
+
+## Example: Employee
+
+```
+interface Employee {
+	pay(): void;
+	isTimeToPay(): boolean;
+}
+
+class EmployeeImpl implements Employee {
+	pay(): void {
+		console.log(`Paying employee`);
+	}
+
+	isTimeToPay(): boolean {
+		return true;
+	}
+}
+
+class NullEmployee implements Employee {
+	pay(): void {
+		//do nothing
+	}
+
+	isTimeToPay(): boolean {
+		return false;
+	}
+}
+
+class EmployeeDB {
+	static getEmployee(): Employee {
+		// Imagine the database crashes, so we return a NullEmployee
+		return new NullEmployee();
+	}
+}
+
+{
+	// This will do nothing because the EmployeeDB returns a null employee!
+	// No need to check `if (employee !== null)`
+	const employee = EmployeeDB.getEmployee();
+	if (employee.isTimeToPay()) {
+		employee.pay();
+	}
+}
+```
