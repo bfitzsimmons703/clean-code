@@ -1,0 +1,68 @@
+# General
+
+1. "Principle of Least Surprise" - code should do what you expect, not surprise you
+
+    - Example - `stringToDay` should do exactly that: convert a string to a Day
+
+        ```
+        export enum Day {
+            Monday,
+            Tuesday,
+        }
+
+        const stringToDay = (dayName: string): Day => {
+            switch (dayName.toLowerCase()) {
+                case 'monday':
+                    return Day.Monday;
+                case 'tuesday':
+                    return Day.Tuesday;
+                default:
+                    throw new Error('Unknown string day name');
+            }
+        };
+        ```
+
+    * If code surprises us, we trust it less
+
+2. DRY and reduce duplication
+    - Every piece of duplication is a missed opportunity for abstraction
+    - Switch cases and if-then statements can be refactored into [polymorphism](/clean-code/oop-basics)
+3. Put code at the right level of abstraction
+    - High level concepts in base classes, low level details in derivatives
+4. Base classes should NOT depend on derivatives
+5. Less is more - classes should have small interfaces (i.e. a small number of public methods to call)
+    - The more methods/variables a class has, the higher the coupling between different systems
+6. Remove dead code
+    - You can always find it in source control
+7. Vertical separation - limit vertical space between callee and caller
+    - Variables should be defined just _above_ their first use! Don't separate the variables and the methods that call them
+    - Private methods should be defined just _below_ their first use.
+8. Avoid "selector arguments": better to have multiple, smaller functions than one big function with an argument that "selects" internal behavior
+    - I.E. boolean arguments with if-else blocks
+9. When in doubt, prefer nonstatic methods over static methods
+    - This way, you can make the method polymorphic if need be
+10. Explanatory variables - break up calculations into intermediate values held be variables with meaningful names
+
+    - Example;
+
+        ```
+        // Bad
+        people[0]['fullName'].split(' ');
+
+        // Better
+        const firstPerson: Person = people[0];
+        const fullName: string = firstPerson['fullName'];
+        const [firstName, lastName] = fullName.split(' '):
+        ```
+
+11. Function names should say what they do
+
+    - Example:
+
+        ```
+        // Bad
+        date.add(5); // add 5 what? Days, hours?
+
+        // Better
+        date.addDays(5);
+        ```
