@@ -66,3 +66,52 @@
         // Better
         date.addDays(5);
         ```
+
+12. Prefer polymorphism over if/else and switch blocks
+13. Replace magic numbers and strings with named constants
+14. Encapsulate conditions
+
+    - Example:
+
+        ```
+        // Bad
+        if (age >= 18 && age <= 64) {...}
+
+        // Better
+        if (canBeDrafted(age)) {...}
+        ```
+
+15. Avoid negative conditionals
+
+    - Example:
+
+        ```
+        // Bad
+        if (isNotASandwich(meal)) {...}
+
+        // Better
+        if (isASandwich(meal)) {...}
+        ```
+
+16. Functions should do one thing (see the [SRP](/solid-principles/single-responsibility))
+17. Make temporal coupling explicit
+
+    - Example:
+
+        ```
+        // Bad - nothing to stop another dev from calling these out of order
+        ready();
+        getSet();
+        go();
+
+        // Better - make subsequent functions depend on the outcome of the prior function
+        const isReady = ready();
+        const isSet = getSet(isReady);
+        go(isSet);
+        ```
+
+18. Functions should descend only one level of abstraction.
+    - Everything within the function should be the same level of abstraction, all one level lower than the named function
+19. Law of Demeter - Write shy code
+    - I.E. modules should only know about their immediate neighbors. See [Objects and Data Structures](/clean-code/objects-and-data-structures)
+    - Avoid things like `a.getB().getC().getD()` - too rigid
